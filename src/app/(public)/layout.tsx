@@ -9,14 +9,12 @@ export const metadata = {
 
 export default function PublicLayout({children}: {children: ReactNode}){
     return (
-        <html lang="es">
-            <body className='bg-white text-slate-900 antialiased'>
-                <div className='min-h-screen flex flex-col'>
-                    <Navbar />
-                    <main className="container mx-auto flex-1 px-4 py-8">{children}</main>
-                    <Footer />
-                </div>
-            </body>
-        </html>
+        
+        <div className='min-h-screen flex flex-col'>
+            <Navbar />
+                <main className="container mx-auto flex-1 px-4 py-8">{children}</main>
+            <Footer />
+        </div>
+            
     )
 }

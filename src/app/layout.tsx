@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
+import { ROUTES } from "@/shared/constants/routes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +25,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="es">
+      <body className="min-h-screen bg-gray-50">
+        <nav className="w-full bg-black text-white p-4 flex gap-4 text-sm">
+          <Link href={ROUTES.HOME} className="hover:underline">Home</Link>
+          <Link href={ROUTES.AUTH.LOGIN} className="hover:underline">Login</Link>
+          <Link href={ROUTES.AUTH.REGISTER} className="hover:underline">Register</Link>
+          <Link href={ROUTES.PROFILE.MY_ADS} className="hover:underline">Mis Anuncios</Link>
+          <Link href={ROUTES.ADS} className="hover:underline">Catálogo</Link>
+          <Link href={ROUTES.ADMIN.ROOT} className="hover:underline">Admin Dashboard</Link>
+        </nav>
+        <main className="p-6">
+          {children}
+        </main>
       </body>
     </html>
   );

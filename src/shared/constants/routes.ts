@@ -7,7 +7,10 @@ export const ROUTES = {
         LOGIN: "/login",
         REGISTER:"/register",
     },
-    PROFILE: "/profile",
+    PROFILE: {
+        ROOT: "/profile",
+        MY_ADS: "/profile/my-ads",
+    },
     ADMIN: {
         ROOT: "/admin",
         DASHBOARD: "/admin/dashboard",

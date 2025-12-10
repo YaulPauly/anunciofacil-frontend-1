@@ -1,3 +1,4 @@
+"use client";
 import React, { use } from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/shared/constants/routes'
@@ -23,7 +24,7 @@ export const Navbar = () => {
 
           {user ? (
             <>
-              <Link href={ROUTES.PROFILE}>Mi perfil</Link>
+              <Link href={ROUTES.PROFILE.ROOT}>Mi perfil</Link>
               {user.role === ROLES.ADMIN && <Link href={ROUTES.ADMIN.ROOT}>Admin</Link>}
             </>
           ) : (
