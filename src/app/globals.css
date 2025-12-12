@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+@theme {
+  --color-navbar: #93ACB5;
+  --color-ads: #A9D3FF;
+  --color-text: #3A3A3A;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
