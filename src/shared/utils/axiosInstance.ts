@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const env = process.env;
 
@@ -8,11 +9,9 @@ const axiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use((config)=> {
-    if (typeof window !== 'undefined'){
-        const token = localStorage.getItem("access_token");
-        if(token && config.headers){
-            config.headers.Authorization = `Bearer ${token}`;
-        }
+    const token = useAuthStore.getState().token;
+    if(token && config.headers){
+        config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 })
