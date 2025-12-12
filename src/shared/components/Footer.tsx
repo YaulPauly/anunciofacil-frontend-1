@@ -3,7 +3,7 @@ import { ROUTES } from "@/shared/constants/routes";
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t mt-8">
+    <footer className="bg-navbar border-t mt-8">
       <div className="container mx-auto p-4 flex justify-between items-center text-sm text-slate-600">
         <div>© {new Date().getFullYear()} AnuncioFácil.</div>
 

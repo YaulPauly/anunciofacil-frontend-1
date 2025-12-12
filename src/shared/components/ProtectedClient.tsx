@@ -4,19 +4,25 @@ import type { ReactNode } from "react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/stores/useAuthStore";
+import { ROUTES } from "@/shared/constants/routes";
+import { Spinner } from "./ui/spinner";
+import { useShallow } from "zustand/shallow";
 
 export default function ProtectedClient({children}: {children: ReactNode}){
     const router = useRouter();
-    const token = useAuthStore((s)=>s.token);
+    const { token, isHydrated } = useAuthStore(useShallow((state) => ({
+        token: state.token,
+        isHydrated: state.isHydrated,
+    })));
 
     useEffect(() => {
-        if(!token){
-            router.push("/login");
+        if(isHydrated && !token){
+            router.push(ROUTES.AUTH.LOGIN);
         }
-    },[token, router]);
+    },[token,isHydrated, router]);
 
-    if(!token){
-        return null;
+    if(!token || !isHydrated){
+        return <Spinner/>;
     }
 
     return<>{children}</>;
