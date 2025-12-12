@@ -1,33 +1,65 @@
 import {create} from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { AuthResponse, User } from "@/types/auth.types";
+import { ROLES } from "@/shared/constants/roles";
 
-export type User = {
-    id: string;
-    name: string;
-    lastname: string;
-    email: string;
-    role: string;
-    avatarUrl?: string;
-    
-};
+export type UserAuth = Omit<User, "token">;
+
+
 
 type AuthState = {
     user: User | null;
     token: string | null;
-    setAuth: (user: User, token: string) => void;
+    isAuthenticated: boolean;
+    isHydrated: boolean;
+    setAuth: (authData: AuthResponse) => void;
     logout: () => void;
-    isLogged: () => boolean;
+    setHydrated: () => void;
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  setAuth: (user, token) => {
-    if (typeof window !== "undefined") localStorage.setItem("access_token", token);
-    set({ user, token });
-  },
-  logout: () => {
-    if (typeof window !== "undefined") localStorage.removeItem("access_token");
-    set({ user: null, token: null });
-  },
-  isLogged: () => !!(typeof window !== "undefined" && localStorage.getItem("access_token")),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isHydrated: false,
+
+      setAuth: (authData) => {
+        const { token, user:userData } = authData;
+        
+        const userProfile: UserAuth = {
+          id: userData.id,
+          email: userData.email,
+          nombre: userData.nombre,
+          role: userData.role,
+        };
+
+        set({
+          user: userProfile,
+          token: token,
+          isAuthenticated: true,
+        })
+
+      },
+      logout: () => {
+        set({ user: null, token: null, isAuthenticated: false });
+      },
+      setHydrated: () => set({ isHydrated: true }),
+    }),
+    {
+      name: "anuncia-facil-auth",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ 
+        user: state.user, 
+        token: state.token, 
+        isAuthenticated: !!state.user && !!state.token 
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setHydrated();
+        }
+      }
+    }
+  )
+);
