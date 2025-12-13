@@ -25,7 +25,7 @@ export function AdCard({ ad, className }: AdCardProps) {
     >
       <div className="relative h-48 w-full">
         <img 
-          src={ad.imagenUrl} 
+          src={ad.imagenUrl || '/placeholder-image.png'} 
           alt={ad.title} 
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           loading="lazy"

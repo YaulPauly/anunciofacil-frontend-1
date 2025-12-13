@@ -12,7 +12,7 @@ export interface Ads {
     category: string;
     location: string;
     imagenUrl: string;
-    usuario: User;
+    usuario: User | null;
     createdAt: string;
     updatedAt: string;
 }
