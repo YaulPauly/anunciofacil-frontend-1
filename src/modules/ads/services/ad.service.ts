@@ -1,6 +1,6 @@
 import axiosInstance from "@/shared/utils/axiosInstance";
 
-import { Ads, AdsFormData, AdsListResponse } from "@/types/ads.types";
+import { Ads, AdsFormData, AdsListResponse, Category } from "@/types/ads.types";
 import { User } from "@/types/auth.types";
 
 const MOCK_USER: User = {
@@ -73,6 +73,13 @@ const MOCK_COMMENTS: AdComment[] = Array.from({ length: 25 }, (_, i) => ({
     createdAt: new Date(Date.now() - i * 3600000).toISOString(), // Comentarios recientes
 }));
 
+
+export const getCategories = async (): Promise<Category[]> => {
+
+    const res = await axiosInstance.get<Category[]>("/categorias/all");
+    return res.data;
+};
+
 export const getCommentsByAdId = async (adId: string, page = 1, limit = 5): Promise<CommentsListResponse> => {
     console.log("MOCK: Obteniendo comentarios para anuncio ID:", adId, "Página:", page, "Límite:", limit);
     return new Promise((resolve)=> {
@@ -100,21 +107,9 @@ export const getCommentsByAdId = async (adId: string, page = 1, limit = 5): Prom
 
 
 export const createAd = async (data: AdsFormData): Promise<Ads> => {
-    console.log("MOCK: Creando anuncio con data:", data);
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const newAd: Ads = {
-                id: MOCK_ANUNCIOS.length + 1,
-                ...data,
-                imagenUrl: 'https://picsum.photos/id/50/600/400',
-                usuario: MOCK_USER,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            };
-            MOCK_ANUNCIOS.unshift(newAd); // Añadirlo al inicio
-            resolve(newAd);
-        }, 500);
-    });
+    // Implementación real a la API
+    const res = await axiosInstance.post<Ads>("/ads/create", data);
+    return res.data;
 }
 
 export const getMyAds = async (page = 1, limit = 9) : Promise<MyAdsListResponse> => {
@@ -141,12 +136,7 @@ export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => 
     });
     return res.data;
 }
-/*
-export const createAd = async (adData: AdsFormData): Promise<Ads> => {
-    const res = await axiosInstance.post("/ads/create", adData);
-    return res.data;
-}
-*/
+
 
 export const getAdById = async (id: string | number): Promise<Ads | null> => {
     const numericId = Number(id);
@@ -157,3 +147,14 @@ export const getAdById = async (id: string | number): Promise<Ads | null> => {
         }, 500);
     });
 }
+
+const AdService = {
+    getCategories,
+    getCommentsByAdId,
+    createAd,
+    getMyAds,
+    getAds,
+    getAdById
+};
+
+export default AdService;

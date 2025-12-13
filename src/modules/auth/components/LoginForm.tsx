@@ -11,9 +11,6 @@ import { Button } from '@/shared/components/ui/button';
 import { Spinner } from '@/shared/components/ui/spinner'; 
 import Link from 'next/link';
 import { ROUTES } from '@/shared/constants/routes'; 
-import { useUIStore } from '@/stores/ui.store';
-
-// --- Lógica del Módulo ---
 import AuthService from '@/modules/auth/services/authService'; 
 import { loginSchema, loginForm as LoginFormType } from '@/modules/auth/schemas/loginSchema'; 
 import { LoginData } from '@/types/auth.types'; 

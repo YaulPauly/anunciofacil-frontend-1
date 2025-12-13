@@ -1,115 +1,203 @@
-// src/components/anuncios/AnuncioForm.tsx (NUEVO)
+// src/components/anuncios/AnuncioForm.tsx
 "use client";
 
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
 
+import AdService, { getCategories, createAd }  from '@/modules/ads/services/ad.service';
+
 import { Input } from '@/shared/components/ui/input'; 
 import { Button } from '@/shared/components/ui/button'; 
 import { Spinner } from '@/shared/components/ui/spinner'; 
 import { createAdSchema, CreateAdForm } from '@/modules/ads/schemas/createAdSchema';
-import { createAd } from '@/modules/ads/services/ad.service';
-import { AdsFormData } from '@/types/ads.types'; 
+import { AdsFormData, Category } from '@/types/ads.types'; 
 import { ROUTES } from '@/shared/constants/routes';
-import { AD_CATEGORIES } from '@/shared/constants/categories';
+import { useEffect, useState } from 'react';
+
 
 export function AdForm() {
-  const router = useRouter();
-  
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors, isSubmitting } 
-  } = useForm<CreateAdForm>({
-    resolver: yupResolver(createAdSchema) as any,
-  });
+  const router = useRouter();
+  
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
-  const onSubmit = async (data: CreateAdForm) => {
-    try {
-      const anuncioData: AdsFormData = {
-        ...data
-      };
-      await createAd(anuncioData);
-      
-      alert("¡Anuncio publicado con éxito!");
-      router.push(ROUTES.PROFILE.MY_ADS);
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors, isSubmitting } 
+  } = useForm<CreateAdForm>({
+    resolver: yupResolver(createAdSchema) as any,
+  });
 
-    } catch (error) {
-      console.error("Error al crear anuncio:", error);
-      alert("Hubo un error al publicar el anuncio. Inténtalo de nuevo.");
-    }
-  };
+  useEffect(() => {
+        getCategories() 
+            .then(data => setCategories(data))
+            .catch(error => console.error("Error al cargar categorías:", error))
+            .finally(() => setLoadingCategories(false));
+    }, []);
 
-  const categories = ['empleos', 'bienes', 'inmuebles', 'autos', 'servicios', 'otro'];
+  const onSubmit = async (data: CreateAdForm) => {
+    try {
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        
-        {/* Título */}
-        <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">Título del Anuncio</label>
-            <Input 
-                id="title" 
-                placeholder="Ej: Vendo automóvil Toyota Corolla en excelente estado" 
-                {...register('title')} 
-            />
-            {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
-        </div>
+      const selectedCategory = categories.find(
+        (cat) => cat.idCategoria === Number(data.idCategoria)
+      );
 
-        <div className='grid grid-cols-2 gap-6'>
-            {/* Categoría */}
-            <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700">Categoría</label>
-                <select
-                    id="category"
-                    {...register('category')}
-                    className="h-10 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs"
-                >
-                    <option value="">Selecciona una categoría</option>
-                    {AD_CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                </select>
-                {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
-            </div>
+      if (!selectedCategory) {
+        alert("Selecciona una categoría válida antes de continuar.");
+        return;
+      }
+      const anuncioPayload = {
+        titulo: data.title,
+        contenido: data.description,
+        locacion: data.location,
+        idCategoria: Number(data.idCategoria), 
+        imagenes: null,
+        estado: 'ACTIVO',
 
-            {/* Ubicación */}
-            <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700">Ubicación (Ciudad/Zona)</label>
-                <Input 
-                    id="location" 
-                    placeholder="Ej: Lima, Miraflores" 
-                    {...register('location')} 
-                />
-                {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
-            </div>
-        </div>
+      };
+      
+      await createAd(anuncioPayload as unknown as AdsFormData); 
+      alert("¡Anuncio publicado con éxito!");
+      router.push(ROUTES.PROFILE.MY_ADS);
 
-        {/* Descripción */}
-        <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">Descripción Detallada</label>
-            <textarea
-                id="description"
-                rows={6}
-                placeholder="Describe el estado, características y detalles de contacto..."
-                {...register('description')}
-                className="w-full min-h-[100px] rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs"
-            ></textarea>
-            {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
-        </div>
+    } catch (error) {
+      console.error("Error al crear anuncio:", error);
+      alert("Hubo un error al publicar el anuncio. Inténtalo de nuevo.");
+    }
+  };
 
-        {/* Botón de Submit */}
-        <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-          {isSubmitting ? (
-              <>
-                  <Spinner />
-                  <span>Publicando Anuncio...</span>
-              </>
-          ) : (
-              "Publicar Anuncio Ahora"
-          )}
-        </Button>
-    </form>
-  );
+  
+
+  return (
+  <div className="max-w-3xl mx-auto">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-8 rounded-2xl border bg-white p-8 shadow-sm"
+    >
+      {/* Header */}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Publicar nuevo anuncio
+        </h2>
+        <p className="text-sm text-gray-500">
+          Completa la información para que tu anuncio sea visible.
+        </p>
+      </div>
+
+      {/* Título */}
+      <div className="space-y-2">
+        <label htmlFor="title" className="text-sm font-medium text-gray-700">
+          Título del anuncio
+        </label>
+        <Input
+          id="title"
+          placeholder="Ej: Toyota Corolla 2020 en excelente estado"
+          {...register("title")}
+        />
+        {errors.title && (
+          <p className="text-sm text-red-600">
+            {errors.title.message}
+          </p>
+        )}
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {/* Categoría */}
+        <div className="space-y-2">
+          <label htmlFor="ad-categoria" className="text-sm font-medium text-gray-700">
+            Categoría
+          </label>
+          <select
+            id="ad-categoria"
+            {...register("idCategoria")}
+            disabled={loadingCategories || isSubmitting}
+            className="
+              h-10 w-full rounded-md border border-input bg-background
+              px-3 text-sm
+              focus:outline-none focus:ring-2 focus:ring-primary
+              disabled:cursor-not-allowed disabled:opacity-50
+            "
+          >
+            <option value="">
+              {loadingCategories ? "Cargando..." : "Selecciona una categoría"}
+            </option>
+            {categories.map((cat) => (
+              <option key={cat.idCategoria} value={cat.idCategoria}>
+                {cat.nombreCategoria}
+              </option>
+            ))}
+          </select>
+          {errors.idCategoria && (
+            <p className="text-sm text-red-600">
+              {errors.idCategoria.message}
+            </p>
+          )}
+        </div>
+
+        {/* Ubicación */}
+        <div className="space-y-2">
+          <label htmlFor="location" className="text-sm font-medium text-gray-700">
+            Ubicación
+          </label>
+          <Input
+            id="location"
+            placeholder="Ej: Lima, Miraflores"
+            {...register("location")}
+          />
+          {errors.location && (
+            <p className="text-sm text-red-600">
+              {errors.location.message}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Descripción */}
+      <div className="space-y-2">
+        <label htmlFor="description" className="text-sm font-medium text-gray-700">
+          Descripción
+        </label>
+        <textarea
+          id="description"
+          rows={5}
+          placeholder="Describe el estado, características y detalles de contacto..."
+          {...register("description")}
+          className="
+            w-full rounded-md border border-input bg-background
+            px-3 py-2 text-sm
+            focus:outline-none focus:ring-2 focus:ring-primary
+          "
+        />
+        {errors.description && (
+          <p className="text-sm text-red-600">
+            {errors.description.message}
+          </p>
+        )}
+      </div>
+
+      {/* Acción */}
+      <div className="pt-4">
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center gap-2">
+              <Spinner />
+              <span>Publicando anuncio...</span>
+            </div>
+          ) : (
+            "Publicar anuncio"
+          )}
+        </Button>
+      </div>
+    </form>
+  </div>
+);
+
 }
