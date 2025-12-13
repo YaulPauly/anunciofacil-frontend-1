@@ -56,8 +56,8 @@ export default function MyAdsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-4">
-            {ads.map((a) => (
-              <article key={a.id} className="border rounded p-4">
+            {ads.map((a, index) => (
+              <article key={a.id ?? `ad-${index}`} className="border rounded p-4">
                 {a.imagenUrl && <img src={a.imagenUrl} alt={a.title} className="h-40 w-full object-cover mb-2 rounded" />}
                 <h2 className="font-semibold">{a.title}</h2>
                 <p className="text-sm text-slate-600">{a.category} · {a.location}</p>
