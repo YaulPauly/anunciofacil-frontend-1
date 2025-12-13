@@ -1,5 +1,10 @@
 import { User } from "./auth.types";
 
+export interface Category {
+    idCategoria: number;
+    nombreCategoria: string; 
+}
+
 export interface Ads {
     id: number;
     title: string;
@@ -14,9 +19,12 @@ export interface Ads {
 
 export interface AdsFormData {
     title: string;
+    idCategoria: number;
     description: string;
     location: string;
     category: string;
+    imagenUrl: string | null;
+    estado: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVO';
 }
 
 export interface AdsListResponse{
