@@ -12,6 +12,7 @@ import { createAdSchema, CreateAdForm } from '@/modules/ads/schemas/createAdSche
 import { createAd } from '@/modules/ads/services/ad.service';
 import { AdsFormData } from '@/types/ads.types'; 
 import { ROUTES } from '@/shared/constants/routes';
+import { AD_CATEGORIES } from '@/shared/constants/categories';
 
 export function AdForm() {
   const router = useRouter();
@@ -26,15 +27,11 @@ export function AdForm() {
 
   const onSubmit = async (data: CreateAdForm) => {
     try {
-      // 1. Convertir precio de string/number a number si es necesario (Yup ya lo hace)
       const anuncioData: AdsFormData = {
         ...data
       };
-
-      // 2. Llamada al servicio
       await createAd(anuncioData);
       
-      // 3. Éxito: Redirigir a mis anuncios
       alert("¡Anuncio publicado con éxito!");
       router.push(ROUTES.PROFILE.MY_ADS);
 
@@ -70,9 +67,9 @@ export function AdForm() {
                     className="h-10 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs"
                 >
                     <option value="">Selecciona una categoría</option>
-                    {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-                    ))}
+                    {AD_CATEGORIES.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
                 </select>
                 {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
             </div>

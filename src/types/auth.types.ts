@@ -2,7 +2,7 @@ export interface User {
     id: number;
     email: string;
     nombre: string;
-    role: "user" | "admin";
+    role: "USUARIO" | "ADMIN";
 }
 
 export interface AuthState {

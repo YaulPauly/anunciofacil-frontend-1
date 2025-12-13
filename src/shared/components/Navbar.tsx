@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ROUTES } from '@/shared/constants/routes'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { ROLES } from '@/shared/constants/roles'
+import { UserProfileMenu } from './UserProfileMenu';
 
 export const Navbar = () => {
   const user = useAuthStore((s) => s.user)
@@ -22,10 +23,7 @@ export const Navbar = () => {
           <Link href={ROUTES.ADS}>Anuncios</Link>
           <Link href={ROUTES.HOME}>Inicio</Link>
           {user ? (
-            <>
-              <Link href={ROUTES.PROFILE.ROOT}>Mi perfil</Link>
-              {user.role.toUpperCase() === ROLES.ADMIN && <Link href={ROUTES.ADMIN.ROOT}>Admin</Link>}
-            </>
+            <UserProfileMenu user={user} /> 
           ) : (
             <Link href={ROUTES.AUTH.LOGIN} className="px-3 py-1 ">
               Acceder

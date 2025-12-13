@@ -27,6 +27,11 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (authData) => {
         const { token, user:userData } = authData;
+
+        if(!userData || !token){
+          console.error("Datos de autenticación incompletos falta userData o token");
+          return;
+        }
         
         const userProfile: UserAuth = {
           id: userData.id,

@@ -1,3 +1,4 @@
+import { AD_CATEGORIES, AdCategoryType } from '@/shared/constants/categories';
 import * as yup from 'yup';
 
 export const createAdSchema = yup.object({
@@ -15,8 +16,8 @@ export const createAdSchema = yup.object({
     .max(50, "La ubicación es demasiado larga (máx. 50 caracteres)")
     .required("La ubicación del anuncio es obligatoria"),
 
-    category: yup.string()
-    .oneOf(['Empleos', 'Bienes', 'Inmuebles', 'Autos'], "Categoría inválida")
+    category: yup.string<AdCategoryType>()
+    .oneOf(AD_CATEGORIES as ReadonlyArray<AdCategoryType>, "Categoría inválida")
     .required("La categoría del anuncio es obligatoria"),
 
 

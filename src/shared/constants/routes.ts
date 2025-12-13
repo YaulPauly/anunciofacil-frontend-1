@@ -1,6 +1,6 @@
 export const ROUTES = {
     //Rutas públicas
-    HOME: "/",
+    HOME: "/homepage",
     ADS: "/ads",
     AD_DETAIL: (id:string) => `/ads/${id}`,
     CATEGORY: (slug: string) => `/category/${slug}`,

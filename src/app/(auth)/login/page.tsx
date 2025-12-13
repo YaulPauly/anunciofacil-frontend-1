@@ -9,6 +9,7 @@ import { LoginForm } from "@/modules/auth/components/LoginForm";
 export default function LoginPage() {
   return (
     <div className="container mx-auto my-0 flex min-h-screen w-full items-center justify-center p-4">
+      
       <div
         id="loginContainer"
         className="flex max-w-6xl w-full min-h-[600px] items-stretch rounded-xl bg-white shadow-lg overflow-hidden" 
@@ -28,12 +29,17 @@ export default function LoginPage() {
         </aside>
         
         <div className="flex flex-col p-8 md:p-16 w-full md:w-1/2">
+        
           <h2 className="mb-6 text-2xl font-semibold text-center">
             Accede a tu cuenta
           </h2>
 
           <LoginForm />
-
+          <div className="text-center mt-4">
+            <span>
+              Deseas continuar como visitante? <Link className="text-blue-400 hover:underline" href={ROUTES.HOME}>Volver</Link>
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -17,11 +17,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`min-h-screen bg-gray-50 ${worksans.className}`}>
-        <Navbar/>
-        <main className="">
           {children}
-        </main>
-        <Footer />
       </body>
     </html>
   );

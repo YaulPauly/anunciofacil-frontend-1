@@ -7,7 +7,7 @@ const MOCK_USER: User = {
     id: 1,
     email: "test@anunciofacil.com",
     nombre: "Usuario Mock",
-    role: "user",
+    role: "USUARIO",
 };
 
 const MOCK_ANUNCIOS: Ads[] = Array.from({ length: 45 }, (_, i) => ({
@@ -22,6 +22,20 @@ const MOCK_ANUNCIOS: Ads[] = Array.from({ length: 45 }, (_, i) => ({
     updatedAt: new Date(Date.now() - i * 86400000).toISOString(),
 }));
 
+export interface SpringPageResponse<T> {
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
+}
+
+export type MyAdsListResponse = {
+    data: AdResume[]; 
+    total: number; 
+    page: number;
+    limit: number;
+};
 
 export type AdResume = {
     id: string;
@@ -32,6 +46,58 @@ export type AdResume = {
     datePost: string;
     status: "PENDING" | "APPROVED" | "REJECTED";
 };
+
+export interface AdComment {
+    id: number;
+    userId: number;
+    userName: string;
+    content: string;
+    createdAt: string;
+}
+
+export interface CommentsListResponse {
+    data: AdComment[];
+    pagination: {
+        totalComments: number;
+        currentPage: number;
+        totalPages: number;
+        commentsPerPage: number;
+    }
+}
+
+const MOCK_COMMENTS: AdComment[] = Array.from({ length: 25 }, (_, i) => ({
+    id: i + 1,
+    userId: (i % 3) + 2, // Diferentes usuarios mock
+    userName: `Comentarista ${i + 1}`,
+    content: `Este es el comentario número ${i + 1}. Me interesa mucho el producto, ¿podrías darme un poco más de información? ¡Gracias!`,
+    createdAt: new Date(Date.now() - i * 3600000).toISOString(), // Comentarios recientes
+}));
+
+export const getCommentsByAdId = async (adId: string, page = 1, limit = 5): Promise<CommentsListResponse> => {
+    console.log("MOCK: Obteniendo comentarios para anuncio ID:", adId, "Página:", page, "Límite:", limit);
+    return new Promise((resolve)=> {
+        setTimeout(() => {
+            const totalComments = MOCK_COMMENTS.length;
+            const commentsPerPage = Math.max(1, limit);
+            const totalPages = Math.ceil(totalComments / commentsPerPage);
+            const currentPage = Math.min(Math.max(1, page), totalPages);
+
+            const startIndex = (currentPage - 1) * commentsPerPage;
+            const endIndex = startIndex + commentsPerPage;
+            const paginatedComments = MOCK_COMMENTS.slice(startIndex, endIndex);
+            resolve({
+                data: paginatedComments,
+                pagination: {
+                    totalComments,
+                    currentPage,
+                    totalPages,
+                    commentsPerPage,
+                }
+            });
+        }, 600);
+    })
+}
+
 
 export const createAd = async (data: AdsFormData): Promise<Ads> => {
     console.log("MOCK: Creando anuncio con data:", data);
@@ -51,15 +117,26 @@ export const createAd = async (data: AdsFormData): Promise<Ads> => {
     });
 }
 
-export const getMyAds = async (page = 1, limit = 10) : Promise<{data: AdResume[]; total: number; page:number; limit:number}> => {
-    const res = await axiosInstance.get("/ads/my-ads", {
-        params: { page, limit }
+export const getMyAds = async (page = 1, limit = 9) : Promise<MyAdsListResponse> => {
+
+    const springPage = page - 1; 
+
+    const res = await axiosInstance.get<SpringPageResponse<AdResume>>("/ads/my-ads", {
+        params: { page: springPage, size: limit }
     });
-    return res.data;
+    
+    const springData = res.data;
+
+    return {
+        data: springData.content,
+        total: springData.totalElements,
+        page: springData.number + 1, 
+        limit: springData.size
+    }
 }
 
 export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => {
-    const res = await axiosInstance.get("/ads", {
+    const res = await axiosInstance.get("/ads/all", {
         params: { page, limit }
     });
     return res.data;

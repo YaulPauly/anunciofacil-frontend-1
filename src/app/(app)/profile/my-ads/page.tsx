@@ -58,10 +58,10 @@ export default function MyAdsPage() {
           <div className="grid grid-cols-3 gap-4">
             {ads.map((a) => (
               <article key={a.id} className="border rounded p-4">
-                {a.imagenUrl && <img src={a.imagenUrl} alt={a.titulo} className="h-40 w-full object-cover mb-2 rounded" />}
-                <h2 className="font-semibold">{a.titulo}</h2>
-                <p className="text-sm text-slate-600">{a.categoria} · {a.locacion}</p>
-                <p className="text-xs text-slate-500 mt-1">{new Date(a.fechaPublicacion).toLocaleString()}</p>
+                {a.imagenUrl && <img src={a.imagenUrl} alt={a.title} className="h-40 w-full object-cover mb-2 rounded" />}
+                <h2 className="font-semibold">{a.title}</h2>
+                <p className="text-sm text-slate-600">{a.category} · {a.location}</p>
+                <p className="text-xs text-slate-500 mt-1">{new Date(a.datePost).toLocaleString()}</p>
                 <div className="mt-3 flex gap-2">
                   <button className="px-2 py-1 border rounded text-sm">Eliminar</button>
                 </div>

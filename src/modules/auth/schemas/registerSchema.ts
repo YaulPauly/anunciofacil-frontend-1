@@ -4,6 +4,9 @@ export const registerSchema = yup.object({
   nombre: yup.string()
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .required("El nombre es obligatorio"),
+  apellidos: yup.string()
+    .min(2, "Los apellidos deben tener al menos 2 caracteres")
+    .required("Los apellidos son obligatorios"),
   email: yup.string()
     .email("Debe ser un correo electrónico válido")
     .required("El email es obligatorio"),

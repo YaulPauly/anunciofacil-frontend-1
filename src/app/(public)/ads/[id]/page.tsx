@@ -8,6 +8,7 @@ import { Spinner } from '@/shared/components/ui/spinner';
 import { Button } from '@/shared/components/ui/button';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import { CommentSection } from '@/modules/ads/components/CommentSection';
 
 interface AnuncioDetallePageProps {
     params: {
@@ -39,7 +40,7 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
                 if (mounted) {
                     if (!data) {
                         setError(true);
-                        // notFound(); // Si quieres redirigir a 404 en Next.js
+                        // notFound();
                     }
                     setAd(data);
                 }
@@ -78,7 +79,6 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
     // Renderizado del Anuncio
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Columna Principal: Imagen y Descripción */}
             <div className="lg:col-span-2">
                 <img 
                     src={ad.imagenUrl} 
@@ -98,9 +98,7 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
                     
                     {/* Sección de Comentarios (Placeholder) */}
                     <div className="mt-10 pt-6 border-t">
-                        <h3 className="text-2xl font-bold mb-4">Comentarios</h3>
-                        <p className="text-sm text-gray-500">Solo usuarios autenticados pueden comentar.</p>
-                        {/* Aquí iría el componente de Comentarios y el formulario */}
+                        <CommentSection adId={params.id} />
                     </div>
                 </div>
             </div>
