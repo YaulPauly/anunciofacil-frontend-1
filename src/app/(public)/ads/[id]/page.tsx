@@ -8,20 +8,22 @@ import { Button } from "@/shared/components/ui/button";
 import { Mail, MapPin } from "lucide-react";
 import { CommentSection } from "@/modules/ads/components/CommentSection";
 import { useAuthStore } from "@/stores/useAuthStore";
+import Image from "next/image";
 
 interface AnuncioDetallePageProps {
   params: Promise<{
     id: string;
   }>;
 }
+const PLACEHOLDER_IMAGE = "/no-image.png";
 
 export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) {
   const { id } = use(params);
-
+  
   const [ad, setAd] = useState<Ads | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-
+  const imageUrl = ad?.imagenUrl ? ad.imagenUrl : PLACEHOLDER_IMAGE;
   const isHydrated = useAuthStore((state) => state.isHydrated);
 
   useEffect(() => {
@@ -69,16 +71,22 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
     );
   }
 
-  const seller = ad.usuario;
+  const seller = ad.usuario as Ads["usuario"] & {
+    imagenUrl?: string | null;
+  };
 
   return (
     <div className="container mx-auto my-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2">
-        <img
-          src={ad.imagenUrl}
-          alt={ad.title}
-          className="w-full max-h-[500px] object-cover rounded-xl"
-        />
+        <div className="relative w-full h-[500px] overflow-hidden rounded-xl"> 
+            <Image
+              src={imageUrl}
+              alt={ad.title}
+              fill={true}
+              style={{ objectFit: 'cover' }}
+              className="transition-transform duration-500 group-hover:scale-105"
+            />
+        </div>
 
         <h1 className="text-4xl font-extrabold mt-6">{ad.title}</h1>
         <div className="flex items-center text-gray-500 mt-2">
@@ -99,6 +107,15 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
         </h3>
         {seller ? (
           <>
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+              <Image
+                src="/no-userimage.png"
+                alt={`Imagen de ${seller?.nombre ?? "anunciante"}`}
+                width={80}
+                height={80}
+                className="object-cover w-full h-full"
+              />
+            </div>
             <p className="text-lg text-center">{seller.nombre}</p>
             <p className="text-sm text-center text-gray-500">
               {seller.email}

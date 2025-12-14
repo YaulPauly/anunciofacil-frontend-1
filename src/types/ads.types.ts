@@ -5,6 +5,11 @@ export interface Category {
     nombreCategoria: string; 
 }
 
+export interface CommentCreateData {
+    contenido: string;
+    idPublicacion: number;
+}
+
 export interface Ads {
     id: number;
     title: string;

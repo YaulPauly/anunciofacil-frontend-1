@@ -1,6 +1,6 @@
 import axiosInstance from "@/shared/utils/axiosInstance";
 
-import { Ads, AdsFormData, AdsListResponse, Category } from "@/types/ads.types";
+import { Ads, AdsFormData, AdsListResponse, Category, CommentCreateData } from "@/types/ads.types";
 import { User } from "@/types/auth.types";
 
 
@@ -31,10 +31,13 @@ export type AdResume = {
 
 export interface AdComment {
     id: number;
-    userId: number;
-    userName: string;
-    content: string;
-    createdAt: string;
+    usuario: {
+        id:number;
+        nombre: string;
+        email:string;
+    }
+    contenido: string;
+    fechaPublicacion: string;
 }
 
 export interface CommentsListResponse {
@@ -66,8 +69,8 @@ export const getCategories = async (): Promise<Category[]> => {
     return res.data;
 };
 
-export const getCommentsByAdId = async (adId: string, page = 1, limit = 5): Promise<CommentsListResponse> => {
-    const res = await axiosInstance.get<SpringPageResponse<AdComment>>(`/ads/${adId}/comments`, {
+export const getCommentsByAdId = async (adId:string, page = 1, limit = 5): Promise<CommentsListResponse> => {
+    const res = await axiosInstance.get<SpringPageResponse<AdComment>>(`/comments/ads/${adId}`, {
         params: { page: page - 1, size: limit }
     });
 
@@ -77,13 +80,22 @@ export const getCommentsByAdId = async (adId: string, page = 1, limit = 5): Prom
         data: springData.content,
         pagination: {
             totalComments: springData.totalElements,
-            currentPage: springData.number + 1,
+            currentPage: springData.number + 1, 
             totalPages: springData.totalPages,
             commentsPerPage: springData.size,
         }
     }
-};
+}
 
+
+export const createComment = async (adId: number, content: string): Promise<AdComment> => {
+    const payload: CommentCreateData = {
+        contenido: content,
+        idPublicacion: adId,
+    };
+    const res = await axiosInstance.post<AdComment>("/comments", payload);
+    return res.data;
+}
 
 export const createAd = async (data: AdsFormData): Promise<Ads> => {
     const res = await axiosInstance.post<Ads>("/ads/create", data);
@@ -102,9 +114,9 @@ export const getMyAds = async (page = 1, limit = 9) : Promise<MyAdsListResponse>
 
     const mappedAds: AdResume[] = springData.content.map(ad => ({
         id: ad.idPublicacion.toString(),
-        title: ad.titulo,
-        location: ad.locacion,
-        category: ad.categoria.nombreCategoria,
+        title: ad.titulo ?? 'Sin título',
+        location: ad.locacion ?? 'Sin locación',
+        category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
         imagenUrl: ad.imagenes || '',
         datePost: ad.fechaPublicacion,
         status: ad.estado as AdResume['status'],
@@ -127,10 +139,10 @@ export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => 
     
     const mappedAds: Ads[] = springData.content.map(ad => ({
         id: ad.idPublicacion,
-        title: ad.titulo,
-        description: ad.contenido,
-        location: ad.locacion,
-        category: ad.categoria.nombreCategoria,
+        title: ad.titulo ?? 'Sin título',
+        description: ad.contenido ?? 'Sin descripción',
+        location: ad.locacion ?? 'Sin locación',
+        category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
         imagenUrl: ad.imagenes || '',
         usuario: ad.usuario, 
         createdAt: ad.fechaPublicacion,
@@ -156,11 +168,11 @@ export const getAdById = async (id: string | number): Promise<Ads | null> => {
 
         return {
             id: ad.idPublicacion,
-            title: ad.titulo,
-            description: ad.contenido,
-            location: ad.locacion,
-            category: ad.categoria.nombreCategoria,
-            imagenUrl: ad.imagenes || '',
+            title: ad.titulo ?? 'Sin título',
+            description: ad.contenido ?? 'Sin descripción',
+            location: ad.locacion ?? 'Sin locación',
+            category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
+            imagenUrl: ad.imagenes || null,
             usuario: ad.usuario,
             createdAt: ad.fechaPublicacion,
             updatedAt: ad.fechaPublicacion,
@@ -179,7 +191,8 @@ const AdService = {
     createAd,
     getMyAds,
     getAds,
-    getAdById
-};
+    getAdById,
+    createComment
+}
 
 export default AdService;
