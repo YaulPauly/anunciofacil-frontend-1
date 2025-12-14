@@ -56,8 +56,8 @@ const CommentFormComp: React.FC<CommentFormProps> = ({ adId, onCommentCreated })
     const onSubmit = async (data: CommentForm) => {
         try {
             await createComment(Number(adId), data.content);
-            reset(); // Limpiar el formulario
-            onCommentCreated(); // Notificar que se creó el comentario para recargar la lista
+            reset();
+            onCommentCreated();
         } catch (error) {
             console.error("Error al crear el comentario:", error);
             alert("No se pudo publicar el comentario. Inténtalo de nuevo.");
@@ -80,6 +80,7 @@ const CommentFormComp: React.FC<CommentFormProps> = ({ adId, onCommentCreated })
                     type="submit" 
                     size="sm" 
                     disabled={isSubmitting}
+                    className='bg-navbar'
                 >
                     {isSubmitting ? <Spinner /> : <SendHorizonal className="size-4" />}
                     <span>{isSubmitting ? 'Enviando...' : 'Comentar'}</span>

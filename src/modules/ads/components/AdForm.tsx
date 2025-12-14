@@ -73,130 +73,118 @@ export function AdForm() {
   return (
   <div className="max-w-3xl mx-auto">
     <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8 rounded-2xl border bg-white p-8 shadow-sm"
-    >
-      {/* Header */}
-      <div className="space-y-2">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Publicar nuevo anuncio
-        </h2>
-        <p className="text-sm text-gray-500">
-          Completa la información para que tu anuncio sea visible.
-        </p>
-      </div>
+  onSubmit={handleSubmit(onSubmit)}
+  className="space-y-10 rounded-2xl border bg-white p-10 shadow-sm"
+>
+  {/* Header */}
+  <div className="space-y-1">
+    <p className="text-sm text-gray-500">
+      Completa la información para que tu anuncio sea visible para otros usuarios.
+    </p>
+  </div>
 
-      {/* Título */}
-      <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium text-gray-700">
-          Título del anuncio
-        </label>
-        <Input
-          id="title"
-          placeholder="Ej: Toyota Corolla 2020 en excelente estado"
-          {...register("title")}
-        />
-        {errors.title && (
-          <p className="text-sm text-red-600">
-            {errors.title.message}
-          </p>
-        )}
-      </div>
+  {/* Información principal */}
+  <div className="space-y-6">
+    {/* Título */}
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium text-gray-700">
+        Título del anuncio
+      </label>
+      <Input
+        placeholder="Ej: Toyota Corolla 2020 en excelente estado"
+        {...register("title")}
+      />
+      {errors.title && (
+        <p className="text-sm text-red-600">
+          {errors.title.message}
+        </p>
+      )}
+    </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Categoría */}
-        <div className="space-y-2">
-          <label htmlFor="ad-categoria" className="text-sm font-medium text-gray-700">
-            Categoría
-          </label>
-          <select
-            id="ad-categoria"
-            {...register("idCategoria")}
-            disabled={loadingCategories || isSubmitting}
-            className="
-              h-10 w-full rounded-md border border-input bg-background
-              px-3 text-sm
-              focus:outline-none focus:ring-2 focus:ring-primary
-              disabled:cursor-not-allowed disabled:opacity-50
-            "
-          >
-            <option value="">
-              {loadingCategories ? "Cargando..." : "Selecciona una categoría"}
-            </option>
-            {categories.map((cat) => (
-              <option key={cat.idCategoria} value={cat.idCategoria}>
-                {cat.nombreCategoria}
-              </option>
-            ))}
-          </select>
-          {errors.idCategoria && (
-            <p className="text-sm text-red-600">
-              {errors.idCategoria.message}
-            </p>
-          )}
-        </div>
+    {/* Grid */}
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      {/* Categoría */}
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium text-gray-700">
+          Categoría
+        </label>
+        <select
+          {...register("idCategoria")}
+          disabled={loadingCategories || isSubmitting}
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+        >
+          <option value="">
+            {loadingCategories ? "Cargando categorías..." : "Selecciona una categoría"}
+          </option>
+          {categories.map((cat) => (
+            <option key={cat.idCategoria} value={cat.idCategoria}>
+              {cat.nombreCategoria}
+            </option>
+          ))}
+        </select>
+        {errors.idCategoria && (
+          <p className="text-sm text-red-600">
+            {errors.idCategoria.message}
+          </p>
+        )}
+      </div>
 
-        {/* Ubicación */}
-        <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium text-gray-700">
-            Ubicación
-          </label>
-          <Input
-            id="location"
-            placeholder="Ej: Lima, Miraflores"
-            {...register("location")}
-          />
-          {errors.location && (
-            <p className="text-sm text-red-600">
-              {errors.location.message}
-            </p>
-          )}
-        </div>
-      </div>
+      {/* Ubicación */}
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium text-gray-700">
+          Ubicación
+        </label>
+        <Input
+          placeholder="Ej: Lima, Miraflores"
+          {...register("location")}
+        />
+        {errors.location && (
+          <p className="text-sm text-red-600">
+            {errors.location.message}
+          </p>
+        )}
+      </div>
+    </div>
 
-      {/* Descripción */}
-      <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium text-gray-700">
-          Descripción
-        </label>
-        <textarea
-          id="description"
-          rows={5}
-          placeholder="Describe el estado, características y detalles de contacto..."
-          {...register("description")}
-          className="
-            w-full rounded-md border border-input bg-background
-            px-3 py-2 text-sm
-            focus:outline-none focus:ring-2 focus:ring-primary
-          "
-        />
-        {errors.description && (
-          <p className="text-sm text-red-600">
-            {errors.description.message}
-          </p>
-        )}
-      </div>
+    {/* Descripción */}
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium text-gray-700">
+        Descripción
+      </label>
+      <textarea
+        rows={5}
+        placeholder="Describe el estado, características y detalles importantes del anuncio..."
+        {...register("description")}
+        className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+      />
+      {errors.description && (
+        <p className="text-sm text-red-600">
+          {errors.description.message}
+        </p>
+      )}
+    </div>
+  </div>
 
-      {/* Acción */}
-      <div className="pt-4">
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <Spinner />
-              <span>Publicando anuncio...</span>
-            </div>
-          ) : (
-            "Publicar anuncio"
-          )}
-        </Button>
-      </div>
-    </form>
+  {/* Acción */}
+  <div className="pt-6 border-t">
+    <Button
+      type="submit"
+      size="lg"
+      className="w-full bg-navbar"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? (
+        <div className="flex items-center gap-2">
+          <Spinner />
+          <span>Publicando anuncio...</span>
+        </div>
+      ) : (
+        "Publicar anuncio"
+      )}
+    </Button>
+  </div>
+    </form>
+
   </div>
 );
 

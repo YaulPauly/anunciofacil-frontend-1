@@ -10,6 +10,15 @@ export interface CommentCreateData {
     idPublicacion: number;
 }
 
+export interface AdUsuario {
+  idUsuario: number;
+  nombre: string;
+  email: string;
+  rol: string;
+  fotoPerfil?: string | null;
+}
+
+
 export interface Ads {
     id: number;
     title: string;
@@ -17,7 +26,7 @@ export interface Ads {
     category: string;
     location: string;
     imagenUrl: string;
-    usuario: User | null;
+    usuario: AdUsuario | User | null;
     createdAt: string;
     updatedAt: string;
 }

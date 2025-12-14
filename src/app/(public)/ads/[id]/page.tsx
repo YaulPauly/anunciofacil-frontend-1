@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useMemo } from "react";
 import { getAdById } from "@/modules/ads/services/ad.service";
-import { Ads } from "@/types/ads.types";
+import { Ads, AdUsuario } from "@/types/ads.types";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Button } from "@/shared/components/ui/button";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Pencil } from "lucide-react";
 import { CommentSection } from "@/modules/ads/components/CommentSection";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Image from "next/image";
+import Link from "next/link";
+import { ROUTES } from "@/shared/constants/routes";
+import { useShallow } from "zustand/shallow";
 
 interface AnuncioDetallePageProps {
   params: Promise<{
@@ -24,11 +27,22 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const imageUrl = ad?.imagenUrl ? ad.imagenUrl : PLACEHOLDER_IMAGE;
-  const isHydrated = useAuthStore((state) => state.isHydrated);
+  const { user, isHydrated } = useAuthStore(useShallow((state) => ({
+    user: state.user,
+    isHydrated: state.isHydrated
+  })));
+
+const isOwner = useMemo(() => {
+  if (!user || !ad?.usuario) return false;
+  const adUserId = (ad.usuario as AdUsuario).idUsuario;
+  return String(user.id) === String(adUserId);
+}, [user, ad]);
+
+
 
   useEffect(() => {
     if (!isHydrated) return;
-
+    
     let mounted = true;
 
     (async () => {
@@ -69,11 +83,15 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
         </p>
       </div>
     );
+    
   }
 
   const seller = ad.usuario as Ads["usuario"] & {
     imagenUrl?: string | null;
   };
+
+  console.log("USER AUTH:", user);
+console.log("USER AD:", ad.usuario);
 
   return (
     <div className="container mx-auto my-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -120,10 +138,19 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
             <p className="text-sm text-center text-gray-500">
               {seller.email}
             </p>
-            <Button variant="outline" className="w-full mt-4">
-              <Mail className="size-4 mr-2" />
-              Enviar mensaje
-            </Button>
+            {isOwner ? (
+                <Link href={ROUTES.PROFILE.MY_ADS} className="w-full mt-4 block">
+                  <Button variant="default" className="w-full">
+                    <Pencil className="size-4 mr-2" />
+                    Editar  Anuncio
+                  </Button>
+                </Link>
+            ) : (
+                <Button variant="outline" className="w-full mt-4" disabled={!user}>
+                  <Mail className="size-4 mr-2" />
+                  {user ? 'Enviar mensaje' : 'Inicia sesión para contactar'}
+                </Button>
+            )}
           </>
         ) : (
           <p className="text-center text-gray-500">
