@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-// Importaciones basadas en archivos provistos
 import { Button } from '@/shared/components/ui/button'; //
 import { AdsListResponse } from '@/types/ads.types'; //
 
@@ -11,20 +9,30 @@ type Pagination = AdsListResponse['pagination'];
 
 interface PaginationControlsProps {
     pagination: Pagination;
+    onPageChange?: (page: number) => void | Promise<void>;
+    isLoading?: boolean;
+    targetPath?: string;
 }
 
-export default function PaginationControls({ pagination }: PaginationControlsProps) {
+export default function PaginationControls({ pagination, onPageChange, isLoading = false, targetPath }: PaginationControlsProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
     const { currentPage, totalPages, totalAds } = pagination;
+    const basePath = targetPath || pathname || '/ads';
     const isFirstPage = currentPage <= 1;
     const isLastPage = currentPage >= totalPages;
 
     const navigateToPage = (page: number) => {
-        // Mantiene otros filtros (si los hubiera) y solo cambia el parámetro 'page'
+        if (page === currentPage || isLoading) return;
+        if (onPageChange) {
+            onPageChange(page);
+            return;
+        }
         const params = new URLSearchParams(searchParams.toString());
         params.set('page', page.toString());
-        router.push(`/ads?${params.toString()}`);
+        const queryString = params.toString();
+        router.push(queryString ? `${basePath}?${queryString}` : basePath);
     };
 
     const handlePrev = () => {
@@ -41,7 +49,6 @@ export default function PaginationControls({ pagination }: PaginationControlsPro
 
     if (totalPages <= 1) return null;
 
-    // Lógica simple para mostrar un rango de 5 páginas
     const MAX_PAGES_DISPLAYED = 5;
     let startPage = Math.max(1, currentPage - Math.floor(MAX_PAGES_DISPLAYED / 2));
     let endPage = Math.min(totalPages, startPage + MAX_PAGES_DISPLAYED - 1);
@@ -59,7 +66,7 @@ export default function PaginationControls({ pagination }: PaginationControlsPro
                 variant="outline"
                 size="icon-sm"
                 onClick={handlePrev}
-                disabled={isFirstPage}
+                disabled={isFirstPage || isLoading}
             >
                 <ChevronLeft className="size-4" />
             </Button>
@@ -70,7 +77,7 @@ export default function PaginationControls({ pagination }: PaginationControlsPro
                     variant={page === currentPage ? "default" : "ghost"}
                     size="sm"
                     onClick={() => navigateToPage(page)}
-                    disabled={page === currentPage}
+                    disabled={page === currentPage || isLoading}
                 >
                     {page}
                 </Button>
@@ -80,7 +87,7 @@ export default function PaginationControls({ pagination }: PaginationControlsPro
                 variant="outline"
                 size="icon-sm"
                 onClick={handleNext}
-                disabled={isLastPage}
+                disabled={isLastPage || isLoading}
             >
                 <ChevronRight className="size-4" />
             </Button>

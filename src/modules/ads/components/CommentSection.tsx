@@ -35,8 +35,6 @@ const CommentCard: React.FC<{ comment: AdComment }> = ({ comment }) => {
     );
 }
 
-
-// --- Componente del Formulario de Comentario ---
 interface CommentFormProps {
     adId: string;
     onCommentCreated: () => void;
@@ -66,7 +64,7 @@ const CommentFormComp: React.FC<CommentFormProps> = ({ adId, onCommentCreated })
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 p-4 bg-gray-50 rounded-lg border">
-            <Textarea // Usar Textarea
+            <Textarea
                 id="comment-content"
                 placeholder="Escribe tu comentario aquí..."
                 rows={3}

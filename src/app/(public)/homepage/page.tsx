@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
 import { ROUTES } from "@/shared/constants/routes";
+import { AdGrid } from "@/modules/ads/components/AdGrid";
+import { getAds } from "@/modules/ads/services/ad.service";
 
-export default function Homepage() {
+
+export default async function Homepage() {
+  const initialAds = await getAds(1, 9);
+
   return (
     <main className="w-full">
 
@@ -63,6 +68,9 @@ export default function Homepage() {
             </div>
           </div>
         </div>
+      </section>
+      <section id="recent-ads" className="py-20 px-4 bg-gray-50">
+        <AdGrid initialAds={initialAds} />
       </section>
 
     </main>

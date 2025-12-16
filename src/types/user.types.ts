@@ -6,3 +6,4 @@ export interface UpdateProfileData {
     nombre?: string;
     email?: string;
 }
+
