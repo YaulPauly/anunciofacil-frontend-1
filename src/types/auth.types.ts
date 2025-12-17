@@ -1,8 +1,9 @@
 export interface User {
-    id: number;
+    id: number | string;
     email: string;
-    nombre: string;
-    role: "USUARIO" | "ADMIN";
+    firstName: string;
+    lastName: string;
+    role: "USER" | "ADMIN";
 }
 
 export interface AuthState {
@@ -11,9 +12,12 @@ export interface AuthState {
 }
 
 export interface AuthResponse {
-    user: User;
     token: string;
-
+    user?: User;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    role?: string;
 }
 
 export interface LoginData {

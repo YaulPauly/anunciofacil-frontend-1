@@ -9,7 +9,19 @@ const axiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use((config)=> {
-    const token = useAuthStore.getState().token;
+    let token = useAuthStore.getState().token;
+
+    // SSR: intenta leer token desde cookies si no está en el store (p.ej. primera carga después de login)
+    if (!token && typeof window === "undefined") {
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const { cookies } = require("next/headers");
+            token = cookies().get("auth-token")?.value;
+        } catch {
+            // ignore; no cookies available
+        }
+    }
+
     if(token && config.headers){
         config.headers.Authorization = `Bearer ${token}`;
     }

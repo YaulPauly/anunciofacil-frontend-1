@@ -86,8 +86,8 @@ export const AdGrid: React.FC<AdGridProps> = ({ initialAds }) => {
                 </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {adsResponse.data.map((ad: AdItem) => (
-                    <AdCard key={ad.id} ad={ad} /> 
+                {adsResponse.data.map((ad: AdItem, idx) => (
+                    <AdCard key={String(ad.id ?? idx)} ad={ad} /> 
                 ))}
             </div>
             

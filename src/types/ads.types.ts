@@ -1,8 +1,11 @@
 import { User } from "./auth.types";
 
 export interface Category {
-    idCategoria: number;
-    nombreCategoria: string; 
+    idCategoria?: number;
+    nombreCategoria?: string; 
+    id?: number;
+    name?: string;
+    description?: string;
 }
 
 export interface CommentCreateData {
@@ -11,21 +14,21 @@ export interface CommentCreateData {
 }
 
 export interface AdUsuario {
-  idUsuario: number;
+  idUsuario: number | string;
   nombre: string;
   email: string;
-  rol: string;
+  rol?: string;
   fotoPerfil?: string | null;
 }
 
 
 export interface Ads {
-    id: number;
+    id: number | string;
     title: string;
     description: string;
     category: string;
     location: string;
-    imagenUrl: string;
+    imagenUrl: string | null;
     usuario: AdUsuario | User | null;
     createdAt: string;
     updatedAt: string;

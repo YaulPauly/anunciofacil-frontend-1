@@ -15,7 +15,7 @@ interface AdCardProps {
 }
 
 export function AdCard({ ad, className }: AdCardProps) {
-  const adUrl = ROUTES.AD_DETAIL(ad.id.toString()); 
+  const adUrl = ROUTES.AD_DETAIL(String(ad.id)); 
   const imageUrl = ad.imagenUrl ? ad.imagenUrl : PLACE_HOLDER_IMAGE;
   
   const formatDate = (dateString: string) => {
@@ -37,9 +37,11 @@ export function AdCard({ ad, className }: AdCardProps) {
 
         />
 
-        <span className="absolute top-2 right-2 bg-ads text-text text-xs font-semibold px-2 py-0.5 rounded-full">
-            {ad.category.charAt(0).toUpperCase() + ad.category.slice(1)}
-        </span>
+        {ad.category && (
+          <span className="absolute top-2 right-2 bg-ads text-text text-xs font-semibold px-2 py-0.5 rounded-full">
+              {ad.category.charAt(0).toUpperCase() + ad.category.slice(1)}
+          </span>
+        )}
       </div>
       
       <div className="p-4">

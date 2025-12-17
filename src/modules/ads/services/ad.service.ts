@@ -3,7 +3,6 @@ import axiosInstance from "@/shared/utils/axiosInstance";
 import { Ads, AdsFormData, AdsListResponse, Category, CommentCreateData } from "@/types/ads.types";
 import { User } from "@/types/auth.types";
 
-
 export interface SpringPageResponse<T> {
     content: T[];
     totalElements: number;
@@ -52,15 +51,27 @@ export interface CommentsListResponse {
 
 
 interface PublicacionResponse {
-    idPublicacion: number;
-    titulo: string;
-    contenido: string;
-    fechaPublicacion: string;
-    locacion: string;
-    imagenes: string | null;
-    estado: string;
-    categoria: { nombreCategoria: string };
-    usuario: User; 
+    id?: number | string;
+    idPublicacion?: number;
+    title?: string;
+    description?: string;
+    detail?: string;
+    image?: string | null;
+    city?: string;
+    district?: string;
+    status?: string;
+    category?: { id?: number; name?: string; description?: string };
+    user?: { id?: number | string; email?: string; firstName?: string; lastName?: string };
+    createdAt?: string;
+    // compat antiguos
+    titulo?: string;
+    contenido?: string;
+    fechaPublicacion?: string;
+    locacion?: string;
+    imagenes?: string | null;
+    estado?: string;
+    categoria?: { nombreCategoria?: string };
+    usuario?: User; 
 }
 
 
@@ -129,25 +140,54 @@ export const getMyAds = async (page = 1, limit = 9) : Promise<MyAdsListResponse>
     }
 }
 
-export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => {
+type AdsFilters = {
+    categoryId?: number | string;
+    city?: string;
+    status?: string;
+};
 
-    const res = await axiosInstance.get<SpringPageResponse<PublicacionResponse>>("/ads/all", {
-        params: { page: page - 1, size: limit } 
+export const getAds = async (
+    page = 1, 
+    limit = 10,
+    filters: AdsFilters = {}
+): Promise<AdsListResponse> => {
+
+
+    const res = await axiosInstance.get<SpringPageResponse<PublicacionResponse>>("/ads", {
+        params: { 
+            page: page - 1, 
+            size: limit,
+            categoryId: filters.categoryId,
+            city: filters.city,
+            status: filters.status ?? "ACTIVO",
+        },
     });
 
     const springData = res.data;
     
-    const mappedAds: Ads[] = springData.content.map(ad => ({
-        id: ad.idPublicacion,
-        title: ad.titulo ?? 'Sin título',
-        description: ad.contenido ?? 'Sin descripción',
-        location: ad.locacion ?? 'Sin locación',
-        category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
-        imagenUrl: ad.imagenes || '',
-        usuario: ad.usuario, 
-        createdAt: ad.fechaPublicacion,
-        updatedAt: ad.fechaPublicacion, 
-    }));
+    const mappedAds: Ads[] = springData.content.map(ad => {
+        const generatedId = `${ad.id ?? ad.idPublicacion ?? ad.title ?? Date.now()}-${Math.random()}`;
+        const userFromNew = ad.user
+            ? {
+                idUsuario: ad.user.id ?? ad.user.email ?? generatedId,
+                nombre: [ad.user.firstName, ad.user.lastName].filter(Boolean).join(" ").trim() || ad.user.email || "Usuario",
+                email: ad.user.email ?? "",
+                rol: undefined,
+              }
+            : undefined;
+
+        return {
+            id: ad.id ?? ad.idPublicacion ?? generatedId,
+            title: ad.title ?? ad.titulo ?? 'Sin título',
+            description: ad.description ?? ad.contenido ?? ad.detail ?? 'Sin descripción',
+            location: ad.city ?? ad.locacion ?? ad.district ?? 'Sin ubicación',
+            category: ad.category?.name ?? ad.categoria?.nombreCategoria ?? 'Sin categoría',
+            imagenUrl: ad.image ?? ad.imagenes ?? null,
+            usuario: userFromNew ?? ad.usuario ?? null, 
+            createdAt: ad.createdAt ?? ad.fechaPublicacion ?? new Date().toISOString(),
+            updatedAt: ad.createdAt ?? ad.fechaPublicacion ?? new Date().toISOString(), 
+        };
+    });
 
 
     return {
@@ -167,15 +207,22 @@ export const getAdById = async (id: string | number): Promise<Ads | null> => {
         const ad = res.data;
 
         return {
-            id: ad.idPublicacion,
-            title: ad.titulo ?? 'Sin título',
-            description: ad.contenido ?? 'Sin descripción',
-            location: ad.locacion ?? 'Sin locación',
-            category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
-            imagenUrl: ad.imagenes || null,
-            usuario: ad.usuario,
-            createdAt: ad.fechaPublicacion,
-            updatedAt: ad.fechaPublicacion,
+            id: ad.id ?? ad.idPublicacion ?? id,
+            title: ad.title ?? ad.titulo ?? 'Sin título',
+            description: ad.description ?? ad.contenido ?? ad.detail ?? 'Sin descripción',
+            location: ad.city ?? ad.locacion ?? ad.district ?? 'Sin ubicación',
+            category: ad.category?.name ?? ad.categoria?.nombreCategoria ?? 'Sin categoría',
+            imagenUrl: ad.image ?? ad.imagenes ?? null,
+            usuario: ad.user 
+                ? {
+                    idUsuario: ad.user.id ?? ad.user.email ?? id,
+                    nombre: [ad.user.firstName, ad.user.lastName].filter(Boolean).join(" ").trim() || ad.user.email || "Usuario",
+                    email: ad.user.email ?? "",
+                    rol: undefined,
+                  }
+                : ad.usuario ?? null,
+            createdAt: ad.createdAt ?? ad.fechaPublicacion ?? new Date().toISOString(),
+            updatedAt: ad.createdAt ?? ad.fechaPublicacion ?? new Date().toISOString(),
         } as Ads;
 
     } catch (error) {
