@@ -6,12 +6,10 @@ import { getAds } from "@/modules/ads/services/ad.service";
 
 
 export default async function Homepage() {
-  const initialAds = await getAds(1, 9);
+ // const initialAds = await getAds(1, 9);
 
   return (
     <main className="w-full">
-
-      {/* HERO */}
       <section className="hero">
         <div className="text-center py-40 px-4">
           <h1 className="text-5xl font-extrabold text-white mb-4">
@@ -37,8 +35,6 @@ export default async function Homepage() {
           </div>
         </div>
       </section>
-
-      {/* BENEFICIOS */}
       <section className="bg-white py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-12">
@@ -70,7 +66,7 @@ export default async function Homepage() {
         </div>
       </section>
       <section id="recent-ads" className="py-20 px-4 bg-gray-50">
-        <AdGrid initialAds={initialAds} />
+        {/*<AdGrid initialAds={initialAds} />*/}
       </section>
 
     </main>

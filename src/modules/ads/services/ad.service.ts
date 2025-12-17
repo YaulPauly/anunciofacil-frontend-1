@@ -1,198 +1,119 @@
 import axiosInstance from "@/shared/utils/axiosInstance";
+import { Ads, AdsFormData, AdsListResponse, Category } from "@/types/ads.types";
 
-import { Ads, AdsFormData, AdsListResponse, Category, CommentCreateData } from "@/types/ads.types";
-import { User } from "@/types/auth.types";
-
-
+// Tipos exactos del Backend
 export interface SpringPageResponse<T> {
     content: T[];
+    page: number;
+    size: number;
     totalElements: number;
     totalPages: number;
-    size: number;
-    number: number;
 }
 
-export type MyAdsListResponse = {
-    data: AdResume[]; 
-    total: number; 
-    page: number;
-    limit: number;
-};
-
-export type AdResume = {
-    id: string;
-    title: string;
-    location: string;
-    category: string;
-    imagenUrl: string;
-    datePost: string;
-    status: "PENDING" | "APPROVED" | "REJECTED" | "ACTIVO";
-};
-
-export interface AdComment {
+export interface AdResponseDTO {
     id: number;
+    title: string;
+    description: string;
+    image: string | null;
+    city: string;
+    district: string;
+    status: string;
+    category: { id: number; name: string };
+    user: { id: number; firstName: string; lastName: string; email: string };
+    createdAt: string;
+}
+
+// Mapper auxiliar
+const mapDtoToAd = (ad: AdResponseDTO): Ads => ({
+    id: ad.id,
+    title: ad.title,
+    description: ad.description,
+    location: `${ad.city}, ${ad.district}`,
+    category: ad.category?.name || 'Sin Categoría',
+    imagenUrl: ad.image || '',
     usuario: {
-        id:number;
-        nombre: string;
-        email:string;
-    }
-    contenido: string;
-    fechaPublicacion: string;
-}
+        id: ad.user.id,
+        nombre: `${ad.user.firstName} ${ad.user.lastName}`,
+        email: ad.user.email
+    } as any,
+    createdAt: ad.createdAt,
+    updatedAt: ad.createdAt,
+});
 
-export interface CommentsListResponse {
-    data: AdComment[];
-    pagination: {
-        totalComments: number;
-        currentPage: number;
-        totalPages: number;
-        commentsPerPage: number;
-    }
-}
-
-
-interface PublicacionResponse {
-    idPublicacion: number;
-    titulo: string;
-    contenido: string;
-    fechaPublicacion: string;
-    locacion: string;
-    imagenes: string | null;
-    estado: string;
-    categoria: { nombreCategoria: string };
-    usuario: User; 
-}
-
-
-export const getCategories = async (): Promise<Category[]> => {
-    const res = await axiosInstance.get<Category[]>("/categorias/all");
-    return res.data;
-};
-
-export const getCommentsByAdId = async (adId:string, page = 1, limit = 5): Promise<CommentsListResponse> => {
-    const res = await axiosInstance.get<SpringPageResponse<AdComment>>(`/comments/ads/${adId}`, {
+export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => {
+    const res = await axiosInstance.get<SpringPageResponse<AdResponseDTO>>("/ads", {
         params: { page: page - 1, size: limit }
     });
 
-    const springData = res.data;
-
     return {
-        data: springData.content,
+        data: res.data.content.map(mapDtoToAd),
         pagination: {
-            totalComments: springData.totalElements,
-            currentPage: springData.number + 1, 
-            totalPages: springData.totalPages,
-            commentsPerPage: springData.size,
+            totalAds: res.data.totalElements,
+            currentPage: res.data.page + 1,
+            totalPages: res.data.totalPages,
+            adsPerPage: res.data.size,
         }
-    }
-}
-
-
-export const createComment = async (adId: number, content: string): Promise<AdComment> => {
-    const payload: CommentCreateData = {
-        contenido: content,
-        idPublicacion: adId,
     };
-    const res = await axiosInstance.post<AdComment>("/comments", payload);
-    return res.data;
-}
+};
 
-export const createAd = async (data: AdsFormData): Promise<Ads> => {
-    const res = await axiosInstance.post<Ads>("/ads/create", data);
-    return res.data;
-}
-
-export const getMyAds = async (page = 1, limit = 9) : Promise<MyAdsListResponse> => {
-
-    const springPage = page - 1; 
-
-    const res = await axiosInstance.get<SpringPageResponse<PublicacionResponse>>("/ads/my-ads", {
-        params: { page: springPage, size: limit }
-    });
+// 2. OBTENER MIS ANUNCIOS (LISTA PLANA)
+// Endpoint: GET /ads/mine
+export const getMyAds = async () => {
+    // NOTA: Este endpoint devuelve un Array directo [], no un objeto PagedResponse
+    const res = await axiosInstance.get<AdResponseDTO[]>("/ads/mine");
     
-    const springData = res.data;
-
-    const mappedAds: AdResume[] = springData.content.map(ad => ({
-        id: ad.idPublicacion.toString(),
-        title: ad.titulo ?? 'Sin título',
-        location: ad.locacion ?? 'Sin locación',
-        category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
-        imagenUrl: ad.imagenes || '',
-        datePost: ad.fechaPublicacion,
-        status: ad.estado as AdResume['status'],
-    }));
     return {
-        data: mappedAds,
-        total: springData.totalElements,
-        page: springData.number + 1, 
-        limit: springData.size
-    }
-}
+        data: res.data.map(mapDtoToAd),
+        total: res.data.length,
+        page: 1,
+        limit: res.data.length // Al ser lista completa, el límite es el total
+    };
+};
 
-export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => {
+// 3. OBTENER CATEGORÍAS
+export const getCategories = async (): Promise<Category[]> => {
+    const res = await axiosInstance.get<Category[]>("/categories");
+    return res.data;
+};
 
-    const res = await axiosInstance.get<SpringPageResponse<PublicacionResponse>>("/ads/all", {
-        params: { page: page - 1, size: limit } 
+// 4. CREAR ANUNCIO
+export const createAd = async (data: AdsFormData, file?: File): Promise<Ads> => {
+    const formData = new FormData();
+    const adRequest = {
+        title: data.title,
+        description: data.description,
+        city: "Lima", 
+        district: data.location,
+        categoryId: Number(data.category),
+        detail: data.description
+    };
+
+    formData.append("ad", new Blob([JSON.stringify(adRequest)], { type: "application/json" }));
+    if (file) formData.append("file", file);
+
+    const res = await axiosInstance.post<AdResponseDTO>("/ads", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
     });
+    return mapDtoToAd(res.data);
+};
 
-    const springData = res.data;
-    
-    const mappedAds: Ads[] = springData.content.map(ad => ({
-        id: ad.idPublicacion,
-        title: ad.titulo ?? 'Sin título',
-        description: ad.contenido ?? 'Sin descripción',
-        location: ad.locacion ?? 'Sin locación',
-        category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
-        imagenUrl: ad.imagenes || '',
-        usuario: ad.usuario, 
-        createdAt: ad.fechaPublicacion,
-        updatedAt: ad.fechaPublicacion, 
-    }));
-
-
-    return {
-        data: mappedAds,
-        pagination: {
-            totalAds: springData.totalElements,
-            currentPage: springData.number + 1,
-            totalPages: springData.totalPages,
-            adsPerPage: springData.size,
-        }
-    }
-}
-
+// 5. OBTENER DETALLE
 export const getAdById = async (id: string | number): Promise<Ads | null> => {
     try {
-        const res = await axiosInstance.get<PublicacionResponse>(`/ads/${id}`);
-        const ad = res.data;
-
-        return {
-            id: ad.idPublicacion,
-            title: ad.titulo ?? 'Sin título',
-            description: ad.contenido ?? 'Sin descripción',
-            location: ad.locacion ?? 'Sin locación',
-            category: ad.categoria?.nombreCategoria ?? 'Sin categoria',
-            imagenUrl: ad.imagenes || null,
-            usuario: ad.usuario,
-            createdAt: ad.fechaPublicacion,
-            updatedAt: ad.fechaPublicacion,
-        } as Ads;
-
+        const res = await axiosInstance.get<AdResponseDTO>(`/ads/${id}`);
+        return mapDtoToAd(res.data);
     } catch (error) {
-
-        console.error(`Error fetching ad ID ${id}:`, error);
+        console.error("Error fetching ad:", error);
         return null;
     }
 };
 
 const AdService = {
     getCategories,
-    getCommentsByAdId,
-    createAd,
-    getMyAds,
     getAds,
-    getAdById,
-    createComment
-}
+    getMyAds,
+    createAd,
+    getAdById
+};
 
 export default AdService;
