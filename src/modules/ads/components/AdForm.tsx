@@ -19,6 +19,7 @@ import { createAd, createCategory, getCategories } from "../services/ad.service"
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useShallow } from "zustand/shallow";
 import { ROLES } from "@/shared/constants/roles";
+import { ImageUpload } from "./ImageUpload";
 
 export function AdForm() {
   const router = useRouter();
@@ -67,7 +68,8 @@ export function AdForm() {
         city: data.city,
         district: data.district,
         categoryId: Number(data.categoryId),
-        detail: data.detail,
+        detail: data.detail ?? undefined,
+        image: file ? file.name : null,
       };
       await createAd(anuncioPayload, file);
       alert("¡Anuncio publicado con éxito!");
@@ -251,40 +253,10 @@ export function AdForm() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">
-              Imagen
-            </label>
-            <div
-              className="rounded border border-dashed px-4 py-6 text-center text-sm text-gray-600 hover:border-gray-400 cursor-pointer"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const f = e.dataTransfer.files?.[0];
-                if (f) setFile(f);
-              }}
-            >
-              <p className="mb-2">
-                Arrastra y suelta una imagen o haz clic para seleccionar
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="file-input-ad-create"
-                onChange={(e) => setFile(e.target.files?.[0])}
-              />
-              <label
-                htmlFor="file-input-ad-create"
-                className="underline cursor-pointer"
-              >
-                Seleccionar archivo
-              </label>
-              {file && (
-                <p className="mt-2 text-xs text-gray-700">
-                  Archivo: {file.name}
-                </p>
-              )}
-            </div>
+            <ImageUpload
+              value={file}
+              onChange={(file) => setFile(file ?? undefined)}
+            />
           </div>
         </div>
 
