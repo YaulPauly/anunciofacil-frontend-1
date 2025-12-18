@@ -3,29 +3,32 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { getCommentsByAdId, AdComment, CommentsListResponse, createComment } from '@/modules/ads/services/ad.service'; // Importar createComment
+import { getCommentsByAdId, createComment } from '@/modules/ads/services/ad.service'; 
 import { Spinner } from '@/shared/components/ui/spinner';
 import { Button } from '@/shared/components/ui/button';
-import { ChevronLeft, ChevronRight, UserCircle, SendHorizonal } from 'lucide-react'; // Importar icono de envío
-import { cn } from '@/shared/utils';
-import { useAuthStore } from '@/stores/useAuthStore'; // Para chequear si está autenticado
+import { ChevronLeft, ChevronRight, UserCircle, SendHorizonal } from 'lucide-react';
+import { useAuthStore } from '@/stores/useAuthStore';
 import Link from 'next/link';
 import { ROUTES } from '@/shared/constants/routes';
-import { commentSchema, CommentForm } from '@/modules/ads/schemas/commentSchema'; // Importar schema
-import { Textarea } from '@/shared/components/ui/textarea'; // Crear un nuevo componente Textarea (ver nota abajo)
+import { commentSchema, CommentForm } from '@/modules/ads/schemas/commentSchema'; 
+import { Textarea } from '@/shared/components/ui/textarea'; 
 
+type CommentsListResponse = Awaited<ReturnType<typeof getCommentsByAdId>>;
+type AdComment = CommentsListResponse['data'][number];
 
 interface CommentSectionProps {
     adId: string;
 }
 
-// Nota: AdComment se actualiza para reflejar la estructura del backend: comment.usuario.nombre
 const CommentCard: React.FC<{ comment: AdComment }> = ({ comment }) => {
     return (
         <div className="border-b border-gray-100 p-4 last:border-b-0">
             <div className="flex items-center space-x-3 mb-2">
                 <UserCircle className="size-6 text-gray-500" />
-                <span className="font-semibold text-gray-800">{comment.usuario.nombre}</span>
+                <span className="font-semibold text-gray-800">
+                    {/* CAMBIO APLICADO: Usamos firstName y lastName */}
+                    {comment.usuario.firstName} {comment.usuario.lastName}
+                </span>
                 <span className="text-xs text-gray-400">
                     {new Date(comment.fechaPublicacion).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
@@ -94,7 +97,7 @@ export function CommentSection({ adId }: CommentSectionProps) {
     const [commentsResponse, setCommentsResponse] = useState<CommentsListResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [refreshTrigger, setRefreshTrigger] = useState(0); // Para forzar la recarga
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const commentsPerPage = 5; 
     
     const totalPages = commentsResponse?.pagination.totalPages ?? 1;
@@ -105,10 +108,9 @@ export function CommentSection({ adId }: CommentSectionProps) {
         try {
             const data = await getCommentsByAdId(adId, pageNumber, commentsPerPage);
             setCommentsResponse(data);
-            setPage(pageNumber); // Sincroniza la UI con la página cargada
+            setPage(pageNumber); 
         } catch (error) {
             console.error("Error fetching comments:", error);
-            // Manejo de errores
             setCommentsResponse({
                 data: [],
                 pagination: { totalComments: 0, currentPage: 1, totalPages: 1, commentsPerPage: 5 }
@@ -118,12 +120,10 @@ export function CommentSection({ adId }: CommentSectionProps) {
         }
     }, [adId, commentsPerPage]);
 
-    // Recargar cuando cambia la página o se dispara el refreshTrigger
     useEffect(() => {
         fetchComments(page);
     }, [fetchComments, page, refreshTrigger]); 
 
-    // Cuando se crea un comentario, forzamos la recarga de la primera página
     const handleCommentCreated = () => {
         setPage(1); 
         setRefreshTrigger(t => t + 1);
@@ -132,12 +132,10 @@ export function CommentSection({ adId }: CommentSectionProps) {
     const handleNext = () => setPage(p => Math.min(totalPages, p + 1));
     const handlePrev = () => setPage(p => Math.max(1, p - 1));
 
-
     return (
         <div className="mt-10 pt-6 border-t">
             <h3 className="text-2xl font-bold mb-4">Comentarios ({totalComments})</h3>
             
-            {/* Formulario para añadir comentario */}
             {isAuthenticated ? (
                 <CommentFormComp adId={adId} onCommentCreated={handleCommentCreated} />
             ) : (
@@ -148,10 +146,7 @@ export function CommentSection({ adId }: CommentSectionProps) {
                 </div>
             )}
 
-
-            {/* Listado y Paginación */}
             <div className="bg-white rounded-lg border shadow-sm">
-                
                 {loading && totalComments === 0 ? ( 
                     <div className="flex justify-center items-center h-40">
                         <Spinner className="size-6 text-primary" />
@@ -161,12 +156,10 @@ export function CommentSection({ adId }: CommentSectionProps) {
                     <p className="p-6 text-gray-500 text-center">Sé el primero en comentar este anuncio.</p>
                 ) : (
                     <>
-                        {/* Lista de Comentarios */}
                         {commentsResponse?.data.map((comment, index) => ( 
-                            <CommentCard key={comment.id ?? index} comment={comment} /> 
-                        ))}
+                            <CommentCard key={comment.id ?? index} comment={comment} /> 
+                        ))}
 
-                        {/* Controles de Paginación de Comentarios */}
                         {totalPages > 1 && (
                             <div className="flex justify-center items-center space-x-2 p-3 border-t">
                                 <Button

@@ -14,7 +14,8 @@ export const AuthService = {
             user: {
                 id: 0, 
                 email: data.email,
-                nombre: `${data.firstName} ${data.lastName}`,
+                firstName: `${data.firstName}`,
+                lastName: `${data.lastName}`,
                 role: data.role
             }
         };
@@ -23,7 +24,6 @@ export const AuthService = {
     },
 
     register: async (userData: RegisterData): Promise<AuthResponse> => {
-        // 1. Mapeamos tus campos (nombre/apellidos) a lo que espera Java (firstName/lastName)
         const payload = {
             email: userData.email,
             password: userData.password,
@@ -36,7 +36,8 @@ export const AuthService = {
             user: {
                 id: 0, 
                 email: data.email,
-                nombre: `${data.firstName} ${data.lastName}`,
+                firstName: `${data.firstName}`,
+                lastName: `${data.lastName}`,
                 role: data.role
             }
         };

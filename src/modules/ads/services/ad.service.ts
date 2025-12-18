@@ -1,7 +1,14 @@
 import axiosInstance from "@/shared/utils/axiosInstance";
-import { Ads, AdsFormData, AdsListResponse, Category } from "@/types/ads.types";
+import { 
+    Ads, 
+    AdsFormData, 
+    AdsListResponse, 
+    Category, 
+    AdComment, 
+    CommentsListResponse 
+} from "@/types/ads.types";
 
-// Tipos exactos del Backend
+// --- DTOs ---
 export interface SpringPageResponse<T> {
     content: T[];
     page: number;
@@ -23,7 +30,15 @@ export interface AdResponseDTO {
     createdAt: string;
 }
 
-// Mapper auxiliar
+export interface CommentResponseDTO { 
+    id: number; 
+    content: string; 
+    user: { id: number; firstName: string; lastName: string; email: string }; 
+    createdAt: string; 
+}
+
+// --- Mappers Auxiliares ---
+
 const mapDtoToAd = (ad: AdResponseDTO): Ads => ({
     id: ad.id,
     title: ad.title,
@@ -33,13 +48,48 @@ const mapDtoToAd = (ad: AdResponseDTO): Ads => ({
     imagenUrl: ad.image || '',
     usuario: {
         id: ad.user.id,
-        nombre: `${ad.user.firstName} ${ad.user.lastName}`,
-        email: ad.user.email
-    } as any,
+        firstName: ad.user.firstName,
+        lastName: ad.user.lastName,
+        email: ad.user.email,
+        role: "USUARIO"
+    },
     createdAt: ad.createdAt,
     updatedAt: ad.createdAt,
 });
 
+const mapDtoToComment = (c: CommentResponseDTO): AdComment => ({
+    id: c.id,
+    usuario: {
+        id: c.user.id,
+        firstName: c.user.firstName,
+        lastName: c.user.lastName,
+        email: c.user.email
+    },
+    contenido: c.content,
+    fechaPublicacion: c.createdAt
+});
+
+
+// --- Servicios Principales ---
+
+export const getCategories = async (): Promise<Category[]> => {
+    const res = await axiosInstance.get<Category[]>("/categories");
+    return res.data;
+};
+
+export const getMyAds = async () => {
+    const res = await axiosInstance.get<AdResponseDTO[]>("/ads/mine");
+    
+    return {
+        data: res.data.map(mapDtoToAd),
+        total: res.data.length,
+        page: 1,
+        limit: res.data.length 
+    };
+};
+
+/* SECCION DE ANUNCIOS */
+ 
 export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => {
     const res = await axiosInstance.get<SpringPageResponse<AdResponseDTO>>("/ads", {
         params: { page: page - 1, size: limit }
@@ -56,27 +106,6 @@ export const getAds = async (page = 1, limit = 10): Promise<AdsListResponse> => 
     };
 };
 
-// 2. OBTENER MIS ANUNCIOS (LISTA PLANA)
-// Endpoint: GET /ads/mine
-export const getMyAds = async () => {
-    // NOTA: Este endpoint devuelve un Array directo [], no un objeto PagedResponse
-    const res = await axiosInstance.get<AdResponseDTO[]>("/ads/mine");
-    
-    return {
-        data: res.data.map(mapDtoToAd),
-        total: res.data.length,
-        page: 1,
-        limit: res.data.length // Al ser lista completa, el límite es el total
-    };
-};
-
-// 3. OBTENER CATEGORÍAS
-export const getCategories = async (): Promise<Category[]> => {
-    const res = await axiosInstance.get<Category[]>("/categories");
-    return res.data;
-};
-
-// 4. CREAR ANUNCIO
 export const createAd = async (data: AdsFormData, file?: File): Promise<Ads> => {
     const formData = new FormData();
     const adRequest = {
@@ -97,7 +126,6 @@ export const createAd = async (data: AdsFormData, file?: File): Promise<Ads> => 
     return mapDtoToAd(res.data);
 };
 
-// 5. OBTENER DETALLE
 export const getAdById = async (id: string | number): Promise<Ads | null> => {
     try {
         const res = await axiosInstance.get<AdResponseDTO>(`/ads/${id}`);
@@ -108,12 +136,41 @@ export const getAdById = async (id: string | number): Promise<Ads | null> => {
     }
 };
 
+// --- SECCIÓN DE COMENTARIOS ---
+
+export const getCommentsByAdId = async (adId: string | number, page = 1, limit = 5): Promise<CommentsListResponse> => {
+    // GET /ads/{adId}/comments
+    const res = await axiosInstance.get<SpringPageResponse<CommentResponseDTO>>(`/ads/${adId}/comments`, {
+        params: { page: page - 1, size: limit }
+    });
+
+    return {
+        data: res.data.content.map(mapDtoToComment),
+        pagination: {
+            totalComments: res.data.totalElements,
+            currentPage: res.data.page + 1,
+            totalPages: res.data.totalPages,
+            commentsPerPage: res.data.size,
+        }
+    };
+};
+
+export const createComment = async (adId: number, content: string): Promise<AdComment> => {
+    //POST /ads/{adId}/comments
+    const res = await axiosInstance.post<CommentResponseDTO>(`/ads/${adId}/comments`, { content });
+    return mapDtoToComment(res.data);
+};
+
+// --- Exportación Final ---
+
 const AdService = {
     getCategories,
     getAds,
     getMyAds,
     createAd,
-    getAdById
+    getAdById,
+    getCommentsByAdId,
+    createComment
 };
 
 export default AdService;
