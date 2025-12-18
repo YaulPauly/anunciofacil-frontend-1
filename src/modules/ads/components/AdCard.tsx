@@ -32,7 +32,7 @@ export function AdCard({ ad, className }: AdCardProps) {
         className
       )}
     >
-      <div className="relative h-48 w-full">
+      <div className="relative h-96 w-full">
         <Image
           src={imageUrl}
           alt={ad.title}
