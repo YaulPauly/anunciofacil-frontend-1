@@ -1,8 +1,33 @@
 import { User } from "./auth.types";
 
+// --- Categorías ---
 export interface Category {
-    idCategoria: number;
-    nombreCategoria: string; 
+    id: number;
+    name: string;
+    description?: string; 
+}
+
+// --- Comentarios---
+export interface AdComment {
+    id: number;
+    usuario: {
+        id: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
+    contenido: string;
+    fechaPublicacion: string; 
+}
+
+export interface CommentsListResponse {
+    data: AdComment[];
+    pagination: {
+        totalComments: number;
+        currentPage: number;
+        totalPages: number;
+        commentsPerPage: number;
+    };
 }
 
 export interface CommentCreateData {
@@ -10,15 +35,17 @@ export interface CommentCreateData {
     idPublicacion: number;
 }
 
+// --- Usuarios en Anuncios ---
 export interface AdUsuario {
-  idUsuario: number;
-  nombre: string;
-  email: string;
-  rol: string;
-  fotoPerfil?: string | null;
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string; 
+    fotoPerfil?: string | null;
 }
 
-
+// --- Anuncios ---
 export interface Ads {
     id: number;
     title: string;
@@ -26,22 +53,12 @@ export interface Ads {
     category: string;
     location: string;
     imagenUrl: string;
-    usuario: AdUsuario | User | null;
+    usuario: AdUsuario | User | null; 
     createdAt: string;
     updatedAt: string;
 }
 
-export interface AdsFormData {
-    title: string;
-    idCategoria: number;
-    description: string;
-    location: string;
-    category: string;
-    imagenUrl: string | null;
-    estado: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVO';
-}
-
-export interface AdsListResponse{
+export interface AdsListResponse {
     data: Ads[];
     pagination: {
         totalAds: number;
@@ -49,4 +66,14 @@ export interface AdsListResponse{
         totalPages: number;
         adsPerPage: number;
     }
+}
+
+// --- Formularios ---
+export interface AdsFormData {
+    title: string;
+    description: string;
+    location: string;
+    category: string; 
+    price?: number;
+    image?: File | null;
 }

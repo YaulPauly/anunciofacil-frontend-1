@@ -1,19 +1,22 @@
-// Interfaz exacta de lo que devuelve Spring Boot
 export interface AuthAPIResponse {
     token: string;
     email: string;
     firstName: string;
     lastName: string;
     role: string;
+    status?: UserStatusType
 }
 
 //Interfaz del usuario
 export interface User {
-    id?: number; // Opcional, ya que el endpoint de login NO devuelve el ID
+    id?: number; 
     email: string;
-    nombre: string;
+    firstName: string;
+    lastName: string;
     role: "USUARIO" | "ADMIN" | string;
 }
+
+export type UserStatusType = 'ACTIVE' | 'BLOCKED';
 
 //Estado de la sesión
 export interface AuthState {
