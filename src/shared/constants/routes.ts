@@ -22,5 +22,7 @@ export const ROUTES = {
         ROOT: "/dashboard",
         USERS: "/dashboard/users",
         CONFIG: "/dashboard/config",
+        ADS: "/dashboard/ads",
+        CATEGORIES: "/dashboard/categories",
     },
 } as const;

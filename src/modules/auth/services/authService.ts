@@ -1,4 +1,3 @@
-// src/modules/auth/services/authService.ts
 import axiosInstance  from "@/shared/utils/axiosInstance";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { AuthAPIResponse, AuthResponse, LoginData, RegisterData } from "@/types/auth.types";

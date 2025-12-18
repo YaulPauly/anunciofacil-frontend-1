@@ -1,43 +1,42 @@
 export interface AuthAPIResponse {
-    token: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    status?: UserStatusType
+  token: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  status?: UserStatusType;
 }
-
-//Interfaz del usuario
 export interface User {
-    id?: number; 
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: "USUARIO" | "ADMIN" | string;
+  id: number | string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: "USER" | "ADMIN";
 }
 
-export type UserStatusType = 'ACTIVE' | 'BLOCKED';
+export type UserStatusType = "ACTIVE" | "BLOCKED";
 
 //Estado de la sesión
 export interface AuthState {
-    user: User | null;
-    token: string | null;
+  user: User | null;
+  token: string | null;
 }
 
 export interface AuthResponse {
-    user: User;
-    token: string;
+  token: string;
+  user?: User;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
 }
 
 export interface LoginData {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
-//Datos para registro
-export interface RegisterData {
-    email: string;
-    password: string;
-    nombre: string;
-    apellidos: string;
+export interface RegisterData extends LoginData {
+  firstName: string;
+  lastName: string;
 }

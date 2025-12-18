@@ -1,4 +1,4 @@
-import {create} from "zustand";
+import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { AuthResponse, User } from "@/types/auth.types";
 import { ROLES } from "@/shared/constants/roles";
@@ -26,19 +26,39 @@ export const useAuthStore = create<AuthState>()(
       isHydrated: false,
 
       setAuth: (authData) => {
-        const { token, user:userData } = authData;
+        const { token, user: userData } = authData;
+        
+        const payload = token ? (() => {
+          try {
+            return JSON.parse(atob(token.split(".")[1] || ""));
+          } catch {
+            return null;
+          }
+        })() : null;
 
-        if(!userData || !token){
-          console.error("Datos de autenticación incompletos falta userData o token");
+        const roleFromPayload = Array.isArray(payload?.authorities) ? payload.authorities[0] : payload?.role;
+        const normalizedRole =
+          userData?.role === ROLES.ADMIN || authData.role === ROLES.ADMIN || roleFromPayload === ROLES.ADMIN
+            ? ROLES.ADMIN
+            : ROLES.USER;
+
+        const firstName = userData?.firstName ?? authData.firstName ?? payload?.name ?? "";
+        const lastName = userData?.lastName ?? authData.lastName ?? payload?.surname ?? "";
+
+        const email = userData?.email ?? authData.email ?? payload?.sub ?? "";
+
+        const userProfile: UserAuth = {
+          id: userData?.id ?? payload?.userId ?? payload?.id ?? email,
+          email,
+          firstName,
+          lastName,
+          role: normalizedRole,
+        };
+
+        if(!token || !email){
+          console.error("Datos de autenticación incompletos falta email o token");
           return;
         }
-        
-        const userProfile: UserAuth = {
-          id: userData.id,
-          email: userData.email,
-          nombre: userData.nombre,
-          role: userData.role,
-        };
 
         set({
           user: userProfile,
@@ -48,6 +68,13 @@ export const useAuthStore = create<AuthState>()(
 
       },
       logout: () => {
+        try {
+          if (typeof localStorage !== "undefined") {
+            localStorage.removeItem("anuncia-facil-auth");
+          }
+        } catch {
+          // ignore
+        }
         set({ user: null, token: null, isAuthenticated: false });
       },
       setHydrated: () => set({ isHydrated: true }),

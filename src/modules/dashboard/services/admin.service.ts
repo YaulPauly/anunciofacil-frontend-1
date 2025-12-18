@@ -11,22 +11,13 @@ export interface AdminDashboardStats {
     newAdsThisMonth: number;
 }
 
-export interface User {
-    id: number;
-    nombre: string;
+export interface AdminUser {
+    id: number | string;
     email: string;
-    fechaRegistro: string;
-    estado: "ACTIVE" | "INACTIVE" | "BANNED";
-}
-
-export interface UsersListResponse {
-    data: User[];
-    pagination: {
-        totalUsers: number;
-        currentPage: number;
-        totalPages: number;
-        usersPerPage: number;
-    }
+    firstName: string;
+    lastName: string;
+    role: "ADMIN" | "USER";
+    status: string;
 }
 
 export interface AdminAdResume {
@@ -75,7 +66,12 @@ export interface AdminCommentsListResponse {
     }
 }
 
-export const getUsers = async () : Promise<UsersListResponse> => {
-    const res = await axiosInstance.get<UsersListResponse>("/admin/users");
+export const getUsers = async (): Promise<AdminUser[]> => {
+    const res = await axiosInstance.get<AdminUser[]>("/users");
     return res.data;
-}
+};
+
+export const updateUserStatus = async (id: string | number, status: "ACTIVE" | "BLOCKED") => {
+    const res = await axiosInstance.patch(`/users/${id}/status`, { status });
+    return res.data;
+};

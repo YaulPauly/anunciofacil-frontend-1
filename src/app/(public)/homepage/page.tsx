@@ -4,9 +4,8 @@ import { ROUTES } from "@/shared/constants/routes";
 import { AdGrid } from "@/modules/ads/components/AdGrid";
 import { getAds } from "@/modules/ads/services/ad.service";
 
-
 export default async function Homepage() {
- const initialAds = await getAds(1, 9);
+  const initialAds = await getAds(1, 10);
 
   return (
     <main className="w-full">
@@ -17,14 +16,13 @@ export default async function Homepage() {
           </h1>
 
           <p className="text-xl text-gray-200 mb-10 max-w-2xl mx-auto">
-            La plataforma más fácil para clasificados. Vende rápido, compra con confianza.
+            La plataforma más fácil para clasificados. Vende rápido, compra con
+            confianza.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link href={ROUTES.CREATE_AD}>
-              <Button size="lg">
-                Publicar Anuncio Gratis
-              </Button>
+              <Button size="lg">Publicar Anuncio Gratis</Button>
             </Link>
 
             <Link href={ROUTES.ADS}>
@@ -37,9 +35,7 @@ export default async function Homepage() {
       </section>
       <section className="bg-white py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-12">
-            ¿Por qué AnuncioFácil?
-          </h2>
+          <h2 className="text-3xl font-bold mb-12">¿Por qué AnuncioFácil?</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="p-6 border rounded-xl">
@@ -73,7 +69,6 @@ export default async function Homepage() {
         </div>
         <AdGrid initialAds={initialAds} />
       </section>
-
     </main>
   );
 }

@@ -9,9 +9,27 @@ const axiosInstance = axios.create({
 })
 
 axiosInstance.interceptors.request.use((config)=> {
-    const token = useAuthStore.getState().token;
+    let token = useAuthStore.getState().token;
+
+    // Fallback: si el store aún no está hidratado, intenta leer desde localStorage en cliente
+    if (!token && typeof window !== "undefined") {
+        try {
+            const persisted = localStorage.getItem("anuncia-facil-auth");
+            if (persisted) {
+                const parsed = JSON.parse(persisted);
+                token = parsed?.state?.token;
+            }
+        } catch {
+            // ignore
+        }
+    }
+
     if(token && config.headers){
         config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Si enviamos FormData, dejamos que el browser defina el boundary
+    if (config.data instanceof FormData && config.headers) {
+        delete config.headers["Content-Type"];
     }
     return config;
 })
