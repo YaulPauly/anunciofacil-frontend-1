@@ -200,7 +200,7 @@ export default function AdminAdsPage() {
                         Editar
                       </button>
                       <button
-                        className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50"
+                        className="rounded-md border px-3 py-1 text-xs bg-red-600 hover:bg-red-800 text-white disabled:opacity-50 transition-colors"
                         onClick={() => toggleStatus(ad.id, ad.status)}
                         disabled={updatingId === ad.id}
                       >
