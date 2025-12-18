@@ -25,7 +25,7 @@ export type AdResume = {
   category: string;
   imagenUrl: string;
   datePost: string;
-  status: "PENDING" | "APPROVED" | "REJECTED" | "ACTIVO";
+  status: "PENDING" | "APPROVED" | "INACTIVO" | "ACTIVO";
   owner?: string;
 };
 export interface PublicacionResponse {

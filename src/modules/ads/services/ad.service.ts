@@ -217,10 +217,7 @@ export const createAd = async (
   };
 };
 
-export const getMyAds = async (
-  page = 1,
-  limit = 10
-): Promise<MyAdsListResponse> => {
+export const getMyAds = async (page = 1,limit = 10): Promise<MyAdsListResponse> => {
   const springPage = page - 1;
 
   const res = await axiosInstance.get<
@@ -278,7 +275,7 @@ export const getAds = async (
         categoryId: filters.categoryId,
         city: filters.city,
         district: (filters as any).district,
-        status: filters.status,
+        status: filters.status ?? 'ACTIVO',
       },
     }
   );

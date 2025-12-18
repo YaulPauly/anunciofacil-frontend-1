@@ -12,9 +12,11 @@ import { Button } from "@/shared/components/ui/button";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { getMyAds, toggleAdStatus } from "@/modules/ads/services/ad.service";
 import { Ads } from "@/types/ads.types";
+import { AdResume } from "@/modules/ads/types/ad.types";
+
 
 export default function MyAdsPage() {
-  const [ads, setAds] = useState<Ads[]>([]);
+  const [ads, setAds] = useState<AdResume[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const [total, setTotal] = useState<number>(0);
@@ -30,14 +32,13 @@ export default function MyAdsPage() {
     }))
   );
 
-  // Función para cargar los anuncios
   const fetchAds = async () => {
     if (!isHydrated || !token) return;
     
     setLoading(true);
     setError(null);
     try {
-      const res = await getMyAds(); // Usamos tu servicio actualizado
+      const res = await getMyAds(page, limit); 
       setAds(res.data ?? []);
       setTotal(res.total ?? 0);
     } catch (error) {
@@ -66,7 +67,7 @@ export default function MyAdsPage() {
       await toggleAdStatus(id, 'INACTIVO');
 
       setAds((prev) =>
-        prev.map((ad) => (ad.id === id ? { ...ad, status: 'INACTIVO' } : ad))
+        prev.map((ad) => (Number(ad.id) === id ? { ...ad, status: 'INACTIVO' } : ad))
       );
       
       alert("Anuncio desactivado correctamente.");
@@ -154,9 +155,9 @@ export default function MyAdsPage() {
                         size="sm" 
                         className="h-8 gap-2"
                         onClick={() => handleToggleStatus(Number(a.id), a.status)}
-                        disabled={processingId === a.id || a.status === 'INACTIVO'}
+                        disabled={processingId === Number(a.id) || a.status === 'INACTIVO'}
                     >
-                        {processingId === a.id ? (
+                        {processingId === Number(a.id) ? (
                             <Spinner className="size-3" />
                         ) : (
                             <Trash2 className="size-4" />
