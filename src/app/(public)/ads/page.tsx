@@ -8,13 +8,14 @@ export const metadata: Metadata = {
 };
 
 interface AdsPageProps {
-    searchParams: {
+    searchParams: Promise<{
         page?: string;
-    };
+    }>;
 }
 
-export default function AdsPage({ searchParams }: AdsPageProps) {
-    const currentPage = parseInt(searchParams.page || "1", 10);
+export default async function AdsPage({ searchParams }: AdsPageProps) {
+    const params = await searchParams;
+    const currentPage = parseInt(params?.page || "1", 10);
     const adsPerPage = 12;
 
     return <AdsPageClient currentPage={currentPage} adsPerPage={adsPerPage} />;

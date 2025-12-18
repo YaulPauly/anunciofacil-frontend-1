@@ -14,6 +14,8 @@ import { ROUTES } from '@/shared/constants/routes';
 import AuthService from '@/modules/auth/services/authService'; 
 import { loginSchema, loginForm as LoginFormType } from '@/modules/auth/schemas/loginSchema'; 
 import { LoginData } from '@/types/auth.types'; 
+import { useAuthStore } from '@/stores/useAuthStore';
+import { ROLES } from '@/shared/constants/roles';
 
 export function LoginForm() {
     const router = useRouter();
@@ -31,7 +33,9 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormType) => {
     try {
         await AuthService.login(data as LoginData);
-        router.replace(ROUTES.HOME);
+        const role = useAuthStore.getState().user?.role;
+        const targetRoute = role === ROLES.ADMIN ? ROUTES.ADMIN.ROOT : ROUTES.HOME;
+        router.replace(targetRoute);
     } catch (error: any){
         console.error('Error during login:', error);
         const errorMessage = error?.response?.data?.message || "Credenciales inválidas o error de red.";

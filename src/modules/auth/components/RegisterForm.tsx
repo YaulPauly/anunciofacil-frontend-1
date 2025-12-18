@@ -29,11 +29,12 @@ export function RegisterForm() {
 
   const onSubmit = async ({ confirmPassword, ...data }: RegisterFormType) => {
     try {
-      const finalData = {
-          ...data,
-          fotoPerfil: null,
-          estado: 'ACTIVO'
-      } as RegisterData;
+      const finalData: RegisterData = {
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      };
 
       await AuthService.register(finalData);
       router.replace(ROUTES.HOME); 
@@ -49,27 +50,27 @@ export function RegisterForm() {
 
         {/* Campo Nombre */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="register-nombre">Nombre</label>
+          <label htmlFor="register-firstName">Nombre</label>
           <Input 
-            id="register-nombre" 
+            id="register-firstName" 
             type="text" 
             placeholder="Tu Nombre" 
-            {...register('nombre')} 
-            aria-invalid={errors.nombre ? "true" : "false"} 
+            {...register('firstName')} 
+            aria-invalid={errors.firstName ? "true" : "false"} 
           />
-          {errors.nombre && <p className="mt-1 text-sm text-red-600">{errors.nombre.message}</p>}
+          {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
         </div>
 
         <div className="flex flex-col gap-2">
-            <label htmlFor="register-apellidos">Apellidos</label>
+            <label htmlFor="register-lastName">Apellidos</label>
             <Input 
-                id="register-apellidos" 
+                id="register-lastName" 
                 type="text" 
                 placeholder="Tus Apellidos" 
-                {...register('apellidos')}
-                aria-invalid={errors.apellidos ? "true" : "false"} 
+                {...register('lastName')}
+                aria-invalid={errors.lastName ? "true" : "false"} 
             />
-              {errors.apellidos && <p className="mt-1 text-sm text-red-600">{errors.apellidos.message}</p>}
+              {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
         </div>
         
         {/* Campo Email */}

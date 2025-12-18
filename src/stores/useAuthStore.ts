@@ -36,15 +36,19 @@ export const useAuthStore = create<AuthState>()(
           }
         })() : null;
 
-        const normalizedRole = userData?.role  === ROLES.ADMIN ? ROLES.ADMIN : ROLES.USER;
+        const roleFromPayload = Array.isArray(payload?.authorities) ? payload.authorities[0] : payload?.role;
+        const normalizedRole =
+          userData?.role === ROLES.ADMIN || authData.role === ROLES.ADMIN || roleFromPayload === ROLES.ADMIN
+            ? ROLES.ADMIN
+            : ROLES.USER;
 
-        const firstName = userData?.firstName ?? payload?.name ?? "";
-        const lastName = userData?.lastName ?? payload?.surname ?? "";
+        const firstName = userData?.firstName ?? authData.firstName ?? payload?.name ?? "";
+        const lastName = userData?.lastName ?? authData.lastName ?? payload?.surname ?? "";
 
-        const email = userData?.email ?? payload?.sub ?? "";
+        const email = userData?.email ?? authData.email ?? payload?.sub ?? "";
 
         const userProfile: UserAuth = {
-          id: payload?.userId,
+          id: userData?.id ?? payload?.userId ?? payload?.id ?? email,
           email,
           firstName,
           lastName,
@@ -64,6 +68,13 @@ export const useAuthStore = create<AuthState>()(
 
       },
       logout: () => {
+        try {
+          if (typeof localStorage !== "undefined") {
+            localStorage.removeItem("anuncia-facil-auth");
+          }
+        } catch {
+          // ignore
+        }
         set({ user: null, token: null, isAuthenticated: false });
       },
       setHydrated: () => set({ isHydrated: true }),

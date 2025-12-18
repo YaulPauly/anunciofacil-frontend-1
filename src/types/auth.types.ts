@@ -26,5 +26,6 @@ export interface LoginData {
 }
 
 export interface RegisterData extends LoginData {
-    nombre: string;
+    firstName: string;
+    lastName: string;
 }

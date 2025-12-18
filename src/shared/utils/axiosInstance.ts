@@ -11,19 +11,25 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use((config)=> {
     let token = useAuthStore.getState().token;
 
-    // SSR: intenta leer token desde cookies si no está en el store (p.ej. primera carga después de login)
-    if (!token && typeof window === "undefined") {
+    // Fallback: si el store aún no está hidratado, intenta leer desde localStorage en cliente
+    if (!token && typeof window !== "undefined") {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const { cookies } = require("next/headers");
-            token = cookies().get("auth-token")?.value;
+            const persisted = localStorage.getItem("anuncia-facil-auth");
+            if (persisted) {
+                const parsed = JSON.parse(persisted);
+                token = parsed?.state?.token;
+            }
         } catch {
-            // ignore; no cookies available
+            // ignore
         }
     }
 
     if(token && config.headers){
         config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Si enviamos FormData, dejamos que el browser defina el boundary
+    if (config.data instanceof FormData && config.headers) {
+        delete config.headers["Content-Type"];
     }
     return config;
 })

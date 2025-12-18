@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, LayoutList, Settings, ChevronDown, UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -18,6 +19,8 @@ interface UserProfileMenuProps {
 export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ user }) => {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
+    const pathname = usePathname();
+    const isDashboard = pathname?.startsWith("/dashboard");
     const menuRef = useRef<HTMLDivElement>(null);
 
     const handleLogout = () => {
@@ -45,20 +48,22 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ user }) => {
         separator?: boolean;
     };
 
-    const menuItems: MenuItem[] = [
-        { 
-            name: 'Mi perfil', 
-            href: ROUTES.PROFILE.ROOT, 
-            icon: User, 
-            separator: false 
-        },
-        { 
-            name: 'Mis anuncios', 
-            href: ROUTES.PROFILE.MY_ADS, 
-            icon: LayoutList, 
-            separator: user.role !== ROLES.ADMIN 
-        },
-    ];
+    const menuItems: MenuItem[] = isDashboard
+        ? []
+        : [
+            { 
+                name: 'Mi perfil', 
+                href: ROUTES.PROFILE.ROOT, 
+                icon: User, 
+                separator: false 
+            },
+            { 
+                name: 'Mis anuncios', 
+                href: ROUTES.PROFILE.MY_ADS, 
+                icon: LayoutList, 
+                separator: user.role !== ROLES.ADMIN 
+            },
+        ];
 
     if (user.role === ROLES.ADMIN) {
         menuItems.push({ 
@@ -66,6 +71,12 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ user }) => {
             href: ROUTES.ADMIN.ROOT, 
             icon: Settings, 
             separator: true 
+        });
+        menuItems.push({
+            name: 'Crear categoría',
+            href: ROUTES.ADMIN.CATEGORIES,
+            icon: Settings,
+            separator: false,
         });
     }
     return (
