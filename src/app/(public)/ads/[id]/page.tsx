@@ -34,7 +34,7 @@ export default function AnuncioDetallePage({ params }: AnuncioDetallePageProps) 
 
 const isOwner = useMemo(() => {
   if (!user || !ad?.usuario) return false;
-  const adUserId = (ad.usuario as AdUsuario).idUsuario;
+  const adUserId = (ad.usuario as AdUsuario).id;
   return String(user.id) === String(adUserId);
 }, [user, ad]);
 
@@ -100,9 +100,11 @@ console.log("USER AD:", ad.usuario);
             <Image
               src={imageUrl}
               alt={ad.title}
-              fill={true}
-              style={{ objectFit: 'cover' }}
-              className="transition-transform duration-500 group-hover:scale-105"
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
+              quality={85}
+              priority={false}
             />
         </div>
 
@@ -128,13 +130,13 @@ console.log("USER AD:", ad.usuario);
             <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
               <Image
                 src="/no-userimage.png"
-                alt={`Imagen de ${seller?.nombre ?? "anunciante"}`}
+                alt={`Imagen de ${seller?.firstName ?? "anunciante"}`}
                 width={80}
                 height={80}
                 className="object-cover w-full h-full"
               />
             </div>
-            <p className="text-lg text-center">{seller.nombre}</p>
+            <p className="text-lg text-center">{`${seller.firstName} ${seller.lastName ?? ""}`}</p>
             <p className="text-sm text-center text-gray-500">
               {seller.email}
             </p>
