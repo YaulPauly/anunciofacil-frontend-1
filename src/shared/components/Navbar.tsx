@@ -28,6 +28,7 @@ export const Navbar = () => {
                 Publicar Anuncio
               </Link>
               <Link href={ROUTES.ADS}>Anuncios</Link>
+              {user ? (<Link href={ROUTES.PROFILE.MY_ADS}>Mis Anuncios</Link>) : null}
               <Link href={ROUTES.HOME}>Inicio</Link>
             </>
           )}

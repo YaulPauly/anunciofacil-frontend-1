@@ -90,7 +90,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ user }) => {
                 aria-haspopup="true"
             >
                 <UserIcon className="size-5 mr-2" />
-                <span className="truncate max-w-[100px] hidden sm:inline">{user.nombre}</span>
+                <span className="truncate max-w-[100px] hidden sm:inline">{user.firstName}</span>
                 <ChevronDown className={cn("size-4 ml-1 transition-transform", isOpen && "rotate-180")} />
             </button>
 
