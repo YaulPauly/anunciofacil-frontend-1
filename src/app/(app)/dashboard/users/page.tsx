@@ -79,7 +79,7 @@ export default function AdminUsersPage() {
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
                     <button
-                      className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50"
+                      className="rounded-md border px-3 py-1 text-xs bg-red-600 hover:bg-red-800 text-white disabled:opacity-50 transition-colors"
                       onClick={() => toggleStatus(user)}
                       disabled={updatingId === user.id}
                     >
