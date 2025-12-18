@@ -286,9 +286,9 @@ export function CommentSection({ adId }: CommentSectionProps) {
                 key={comment.id ?? index}
                 comment={comment}
                 isOwner={
-                  authUser?.email &&
-                  comment.usuario?.email &&
-                  authUser.email === comment.usuario.email
+                  !!authUser?.email &&
+                  !!comment.usuario?.email &&
+                  authUser?.email === comment.usuario?.email
                 }
                 onEdit={() => handleEdit(comment)}
                 onDelete={() => handleDelete(comment)}

@@ -6,6 +6,7 @@ import {
   Category,
   AdComment,
   CommentsListResponse,
+  AdResponseDTO,
 } from "@/types/ads.types";
 
 import {
@@ -445,6 +446,16 @@ export const getAdById = async (id: string | number): Promise<Ads | null> => {
   }
 };
 
+export const toggleAdStatus = async (id: number, newStatus: 'ACTIVO' | 'INACTIVO') => {
+    const res = await axiosInstance.patch<AdResponseDTO>(`/ads/${id}/status`, null, {
+        params: { status: newStatus }
+    });
+    return res.data;
+};
+
+
+
+
 // --- Exportación Final ---
 
 const AdService = {
@@ -459,5 +470,6 @@ const AdService = {
   getAdById,
   createComment,
 };
+
 
 export default AdService;
