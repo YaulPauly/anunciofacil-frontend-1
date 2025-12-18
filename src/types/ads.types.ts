@@ -5,7 +5,6 @@ export interface Category {
   id?: number;
   name?: string;
   description?: string;
-  // Compatibilidad con backend anterior
   idCategoria?: number;
   nombreCategoria?: string;
 }
@@ -78,4 +77,18 @@ export interface CommentsListResponse {
     totalPages: number;
     commentsPerPage: number;
   };
+}
+
+export interface AdResponseDTO {
+    id: number;
+    title: string;
+    description: string;
+    image: string | null;
+    city: string;
+    district: string;
+    status: string;
+    category: { id: number; name: string };
+    user: { id: number; firstName: string; lastName: string; email: string };
+    detail: string;
+    createdAt: string;
 }
