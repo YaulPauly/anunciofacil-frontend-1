@@ -94,7 +94,7 @@ export default function AnuncioDetallePage({
   return (
     <div className="container mx-auto my-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2">
-        <div className="relative w-full h-[500px] overflow-hidden rounded-xl">
+        <div className="relative w-full h-[700px] overflow-hidden rounded-xl">
           <Image
             src={imageUrl}
             alt={ad.title}
