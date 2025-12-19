@@ -27,12 +27,14 @@ import {
 } from "@/modules/ads/schemas/commentSchema"; // Importar schema
 import { Textarea } from "@/shared/components/ui/textarea"; // Crear un nuevo componente Textarea (ver nota abajo)
 import { AdComment, CommentsListResponse } from "@/types/ads.types";
+import { EditCommentModal } from "./EditCommentModal";
+
 
 interface CommentSectionProps {
   adId: string;
 }
 
-// Nota: AdComment se actualiza para reflejar la estructura del backend: comment.usuario.nombre
+
 const CommentCard: React.FC<{
   comment: AdComment;
   isOwner: boolean;
@@ -56,7 +58,7 @@ const CommentCard: React.FC<{
         {isOwner && (
           <div className="ml-auto flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="h-7 px-2"
               onClick={onEdit}
@@ -64,9 +66,9 @@ const CommentCard: React.FC<{
               Editar
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="h-7 px-2 text-red-600"
+              className="h-7 px-2 text-red-600 hover:bg-red-400 hover:text-white"
               onClick={onDelete}
             >
               Eliminar
@@ -153,6 +155,9 @@ export function CommentSection({ adId }: CommentSectionProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Para forzar la recarga
   const [actionLoading, setActionLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [commentToEdit, setCommentToEdit] = useState<AdComment | null>(null);
+
   const commentsPerPage = 5;
 
   const totalPages = commentsResponse?.pagination.totalPages ?? 1;
@@ -164,10 +169,9 @@ export function CommentSection({ adId }: CommentSectionProps) {
       try {
         const data = await getCommentsByAdId(adId, pageNumber, commentsPerPage);
         setCommentsResponse(data);
-        setPage(pageNumber); // Sincroniza la UI con la página cargada
+        setPage(pageNumber);
       } catch (error) {
         console.error("Error fetching comments:", error);
-        // Manejo de errores
         setCommentsResponse({
           data: [],
           pagination: {
@@ -198,7 +202,25 @@ export function CommentSection({ adId }: CommentSectionProps) {
   const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
   const handlePrev = () => setPage((p) => Math.max(1, p - 1));
 
-  const handleEdit = async (comment: AdComment) => {
+  const checkIsOwner = (comment: AdComment) => {
+    if (!authUser) return false;
+    return (
+      (comment.usuario as any)?.id === authUser.id || 
+      comment.usuario?.email === authUser.email
+    )
+  }
+
+  const handleOpenEdit = (comment: AdComment) => {
+    if (!checkIsOwner(comment)) {
+    alert("No tienes permiso para editar este comentario.");
+    return;
+    }
+
+    setCommentToEdit(comment);
+    setIsEditModalOpen(true);
+  }
+
+  /*const handleEdit = async (comment: AdComment) => {
     const isOwner =
       !!authUser &&
       ((comment.usuario as any)?.id === authUser.id ||
@@ -221,21 +243,19 @@ export function CommentSection({ adId }: CommentSectionProps) {
     }
   };
 
+  */
   const handleDelete = async (comment: AdComment) => {
-    const isOwner =
-      !!authUser &&
-      ((comment.usuario as any)?.id === authUser.id ||
-        (comment.usuario as any)?.idUsuario === authUser.id ||
-        comment.usuario?.email === authUser.email);
-    if (!isOwner) return;
-    if (!confirm("¿Eliminar este comentario?")) return;
+    if (!checkIsOwner(comment)) return;
+
+    if (!confirm("¿Estás seguro de que deseas eliminar este comentario?")) return;
+  
     setActionLoading(true);
     try {
       await deleteComment(adId, comment.id);
       setSuccessMessage("Comentario eliminado.");
       setRefreshTrigger((t) => t + 1);
     } catch (err) {
-      console.error("Error al eliminar comentario:", err);
+      console.error("Error al eliminar:", err);
       alert("No se pudo eliminar el comentario.");
     } finally {
       setActionLoading(false);
@@ -285,12 +305,8 @@ export function CommentSection({ adId }: CommentSectionProps) {
               <CommentCard
                 key={comment.id ?? index}
                 comment={comment}
-                isOwner={
-                  !!authUser?.email &&
-                  !!comment.usuario?.email &&
-                  authUser?.email === comment.usuario?.email
-                }
-                onEdit={() => handleEdit(comment)}
+                isOwner={checkIsOwner(comment)}
+                onEdit={() => handleOpenEdit(comment)}
                 onDelete={() => handleDelete(comment)}
               />
             ))}
@@ -321,6 +337,20 @@ export function CommentSection({ adId }: CommentSectionProps) {
             )}
           </>
         )}
+        {isEditModalOpen && commentToEdit && (
+        <EditCommentModal
+          adId={adId}
+          comment={commentToEdit}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setCommentToEdit(null);
+          }}
+          onSuccess={() => {
+            setSuccessMessage("Comentario actualizado correctamente.");
+            setRefreshTrigger((t) => t + 1); // Esto recarga la lista para ver el cambio
+          }}
+        />
+      )}
       </div>
     </div>
   );
