@@ -347,7 +347,7 @@ export function CommentSection({ adId }: CommentSectionProps) {
           }}
           onSuccess={() => {
             setSuccessMessage("Comentario actualizado correctamente.");
-            setRefreshTrigger((t) => t + 1); // Esto recarga la lista para ver el cambio
+            setRefreshTrigger((t) => t + 1); 
           }}
         />
       )}

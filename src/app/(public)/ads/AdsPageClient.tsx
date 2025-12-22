@@ -4,13 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useShallow } from "zustand/shallow";
 
-import { getAds } from "@/modules/ads/services/ad.service";
+// Agregamos getCategories e importamos la interfaz Category
+import { getAds, getCategories } from "@/modules/ads/services/ad.service";
 import { AdCard } from "@/modules/ads/components/AdCard";
 import PaginationControls from "@/modules/ads/components/PaginationControls";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { AdsListResponse } from "@/types/ads.types";
+import { AdsListResponse, Category } from "@/types/ads.types";
+import { CategoryFilter } from "@/modules/ads/components/CategoryFilter";
 
 interface AdsPageClientProps {
   currentPage: number;
@@ -30,12 +32,22 @@ const buildEmptyResponse = (
   },
 });
 
-export function AdsPageClient({ currentPage, adsPerPage }: AdsPageClientProps) {
+export function AdsPageClient({
+  currentPage: initialPage,
+  adsPerPage,
+}: AdsPageClientProps) {
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
+  const [filters, setFilters] = useState({
+    page: initialPage,
+    categoryId: undefined as number | undefined,
+  });
+
   const [adsData, setAdsData] = useState<AdsListResponse>(() =>
-    buildEmptyResponse(currentPage, adsPerPage)
+    buildEmptyResponse(filters.page, adsPerPage)
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const { isHydrated } = useAuthStore(
     useShallow((state) => ({
       isHydrated: state.isHydrated,
@@ -43,9 +55,13 @@ export function AdsPageClient({ currentPage, adsPerPage }: AdsPageClientProps) {
   );
 
   useEffect(() => {
-    if (!isHydrated) {
-      return;
-    }
+    getCategories()
+      .then(setCategoriesList)
+      .catch((err) => console.error("Error cargando categorías", err));
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
 
     let active = true;
     setLoading(true);
@@ -53,39 +69,57 @@ export function AdsPageClient({ currentPage, adsPerPage }: AdsPageClientProps) {
 
     (async () => {
       try {
-        const data = await getAds(currentPage, adsPerPage);
+        const data = await getAds(filters.page, adsPerPage, {
+          categoryId: filters.categoryId,
+        });
+
         if (!active) return;
         setAdsData(data);
       } catch (err) {
         console.error("Error fetching ads:", err);
         if (!active) return;
+
         if (axios.isAxiosError(err) && err.response?.status === 403) {
           setError("No tienes permisos para ver los anuncios.");
         } else {
           setError("Hubo un error al cargar los anuncios. Intenta nuevamente.");
         }
-        setAdsData(buildEmptyResponse(currentPage, adsPerPage));
+
+        setAdsData(buildEmptyResponse(filters.page, adsPerPage));
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       }
     })();
 
     return () => {
       active = false;
     };
-  }, [currentPage, adsPerPage, isHydrated]);
+  }, [filters, adsPerPage, isHydrated]);
 
   const ads = adsData.data;
   const pagination = useMemo(() => adsData.pagination, [adsData]);
+  const handleCategoryChange = (categoryName: string) => {
+    if (categoryName === "all") {
+      setFilters((prev) => ({ ...prev, categoryId: undefined, page: 1 }));
+      return;
+    }
+    const selectedCat = categoriesList.find(
+      (cat) => cat.name?.toLowerCase() === categoryName.toLowerCase()
+    );
+    setFilters((prev) => ({
+      ...prev,
+      categoryId: selectedCat?.id,
+      page: 1,
+    }));
+  };
 
   return (
     <div className="space-y-8 container mx-auto px-4 py-8">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-3xl font-extrabold text-gray-900">
           Anuncios Recientes
         </h1>
+        <CategoryFilter onCategoryChange={handleCategoryChange} />
       </header>
 
       {error && (
@@ -108,7 +142,6 @@ export function AdsPageClient({ currentPage, adsPerPage }: AdsPageClientProps) {
               >
                 <Skeleton className="h-40 w-full rounded-lg" />
                 <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
                 <div className="space-y-2">
                   <Skeleton className="h-3 w-1/3" />
                   <Skeleton className="h-3 w-2/3" />
@@ -120,7 +153,7 @@ export function AdsPageClient({ currentPage, adsPerPage }: AdsPageClientProps) {
       ) : ads.length === 0 ? (
         <div className="p-10 text-center border rounded-lg bg-gray-50">
           <p className="text-xl text-gray-600">
-            No se encontraron anuncios para la página actual.
+            No se encontraron anuncios para los criterios seleccionados.
           </p>
         </div>
       ) : (
@@ -130,7 +163,6 @@ export function AdsPageClient({ currentPage, adsPerPage }: AdsPageClientProps) {
               <AdCard key={ad.id} ad={ad} />
             ))}
           </div>
-
           <div className="pt-4 border-t">
             <PaginationControls pagination={pagination} />
           </div>
