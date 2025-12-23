@@ -119,7 +119,10 @@ export function AdsPageClient({
         <h1 className="text-3xl font-extrabold text-gray-900">
           Anuncios Recientes
         </h1>
-        <CategoryFilter onCategoryChange={handleCategoryChange} />
+        <CategoryFilter
+          onCategoryChange={handleCategoryChange}
+          categories={categoriesList}
+        />
       </header>
 
       {error && (

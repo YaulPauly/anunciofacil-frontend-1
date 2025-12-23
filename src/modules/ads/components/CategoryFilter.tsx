@@ -6,16 +6,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-
-import { getCategories } from "@/modules/ads/services/ad.service";
-
-const categories = await getCategories();
+import { Category } from "@/types/ads.types";
 
 interface CategoryFilterProps {
   onCategoryChange: (category: string) => void;
+  categories: Category[];
 }
 
-export function CategoryFilter({ onCategoryChange }: CategoryFilterProps) {
+export function CategoryFilter({
+  onCategoryChange,
+  categories,
+}: CategoryFilterProps) {
   return (
     <div className="w-full max-w-[200px]">
       <Select onValueChange={onCategoryChange}>
